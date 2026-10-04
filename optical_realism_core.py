@@ -178,6 +178,113 @@ def _disk_blur(x, radius):
     return out
 
 
+def _seeded(device, seed, salt):
+    """A generator for one effect, so each repeats with the seed but none
+    shares the grain's random stream."""
+    if seed is None:
+        return None
+    gen = torch.Generator(device=device)
+    gen.manual_seed((int(seed) * 1000003 + salt) & 0x7FFFFFFFFFFFFFFF)
+    return gen
+
+
+def _flash(img, depth, strength, reach):
+    """A small flash on the camera: lights what is near, leaves the rest dark.
+
+    Flash light falls off with the square of the distance, so with the exposure
+    set for the subject the background sinks. depth is 1 = near. The light is
+    a little cooler than tungsten ambient, strongest at the centre of the
+    frame, and lifts the subject's shadows (it comes from the lens axis).
+    """
+    _, h, w, _ = img.shape
+    # reach 0: only the nearest things are lit; 1: most of the scene.
+    k = 6.0 - 5.0 * float(reach)
+    lit = torch.clamp(depth, 0.0, 1.0) ** k
+    y = torch.linspace(-1, 1, h, device=img.device).view(1, h, 1, 1)
+    x = torch.linspace(-1, 1, w, device=img.device).view(1, 1, w, 1)
+    lit = lit * (1.0 - 0.25 * torch.clamp((x ** 2 + y ** 2) / 2.0, 0.0, 1.0))
+
+    lin = img ** 2.2
+    # Exposure set for the flash: the ambient drops up to ~2.5 stops, and the
+    # flash puts the nearest things back a little above where they were.
+    cut = min(0.85, 1.1 * strength)
+    gain = (1.0 - cut) + (cut + 0.5 * strength) * lit
+    colour = torch.tensor([0.97, 1.0, 1.05], device=img.device).view(1, 1, 1, 3)
+    lin = lin * gain * torch.lerp(torch.ones_like(colour), colour, lit * strength)
+    lin = lin + 0.04 * strength * lit
+    # Soft shoulder instead of a hard clip, so a lit face does not go flat white.
+    knee = 0.8
+    over = torch.clamp(lin - knee, min=0.0)
+    lin = torch.where(lin > knee, knee + (1.0 - knee) * torch.tanh(over / (1.0 - knee)), lin)
+    return torch.clamp(lin, 0.0, 1.0) ** (1.0 / 2.2)
+
+
+def _dust(img, amount, scratches, res_scale, seed):
+    """Dust specks and fine scratches on the negative: they print as light
+    marks, most visible in the dark parts of the frame."""
+    _, h, w, _ = img.shape
+    device = img.device
+    gen = _seeded(device, seed, 7)
+    marks = torch.zeros(1, 1, h, w, device=device)
+    s = max(res_scale, 0.25)
+
+    if amount > 0:
+        # Specks per megapixel; most are tiny, a few are big enough to see.
+        n_total = int(amount * 900 * (h * w) / 1_048_576) + 1
+        for radius, share in ((0.6, 0.70), (1.4, 0.22), (2.6, 0.08)):
+            n = max(1, int(n_total * share))
+            ys = torch.randint(0, h, (n,), generator=gen, device=device)
+            xs = torch.randint(0, w, (n,), generator=gen, device=device)
+            alpha = 0.35 + 0.65 * torch.rand(n, generator=gen, device=device)
+            layer = torch.zeros(h * w, device=device)
+            layer.scatter_reduce_(0, ys * w + xs, alpha, reduce="amax")
+            layer = layer.view(1, 1, h, w)
+            r = max(0, int(round(radius * s)))
+            if r > 0:
+                layer = F.max_pool2d(layer, 2 * r + 1, stride=1, padding=r)
+                # Round off the square the pooling leaves.
+                ks = 2 * r + 1
+                layer = torch.clamp(_blur(layer, max(3, ks), max(0.6, r * 0.6)) * 1.6, 0.0, 1.0)
+            marks = torch.maximum(marks, layer)
+        marks = _blur(marks, 3, 0.6 * max(1.0, s))
+
+    if scratches > 0:
+        # Thin vertical lines from the film running through the gate.
+        n = 1 + int(scratches * 6)
+        col = torch.zeros(1, 1, h, w, device=device)
+        rows = torch.arange(h, device=device).view(h, 1)
+        for _ in range(n):
+            x0 = int(torch.randint(0, w, (1,), generator=gen, device=device))
+            y0 = int(torch.randint(0, h, (1,), generator=gen, device=device))
+            length = int(h * (0.2 + 0.8 * float(torch.rand(1, generator=gen, device=device))))
+            a = 0.25 + 0.5 * float(torch.rand(1, generator=gen, device=device))
+            span = ((rows >= y0) & (rows < y0 + length)).float().view(h)
+            col[0, 0, :, x0] = torch.maximum(col[0, 0, :, x0], span * a)
+        width = max(1, int(round(0.8 * s)))
+        if width > 1:
+            col = F.max_pool2d(col, (1, 2 * (width // 2) + 1), stride=1, padding=(0, width // 2))
+        marks = torch.maximum(marks, _blur(col, 3, 0.5) * scratches)
+
+    m = torch.clamp(marks, 0.0, 1.0).permute(0, 2, 3, 1) * min(1.0, 0.5 + amount)
+    tone = torch.tensor([1.0, 0.98, 0.95], device=device).view(1, 1, 1, 3)
+    return 1.0 - (1.0 - img) * (1.0 - m * tone)
+
+
+def _stamp(img, mask, res_scale):
+    """The orange date, with the soft glow it gets from being burned into
+    the emulsion."""
+    _, h, w, _ = img.shape
+    m = pil_to_tensor(mask.convert("L").resize((w, h)), img.device)[..., :1]
+    m_p = m.permute(0, 3, 1, 2)
+    core = _blur(m_p, 3, 0.7).permute(0, 2, 3, 1)
+    ks = max(3, int(round(9 * max(res_scale, 0.5))) | 1)
+    glow = _blur(m_p, ks, ks / 3.0).permute(0, 2, 3, 1)
+    glow_c = torch.tensor([1.0, 0.42, 0.06], device=img.device).view(1, 1, 1, 3)
+    core_c = torch.tensor([1.0, 0.66, 0.22], device=img.device).view(1, 1, 1, 3)
+    light = torch.clamp(glow_c * glow * 0.7 + core_c * core * 0.95, 0.0, 1.0)
+    return 1.0 - (1.0 - img) * (1.0 - light)
+
+
 @torch.no_grad()
 def apply_optical_realism(
     image: Image.Image,
@@ -199,6 +306,8 @@ def apply_optical_realism(
     light_wrap_strength: float = 0.0,
     promist_strength: float = 0.0,
     halation_strength: float = 0.0,
+    flash_strength: float = 0.0,
+    flash_reach: float = 0.5,
     # 4. Atmosphere
     atmosphere_enabled: bool = False,
     haze_strength: float = 0.0,
@@ -211,6 +320,9 @@ def apply_optical_realism(
     grain_power: float = 0.0,
     monochrome_grain: bool = False,
     highlight_rolloff: float = 0.0,
+    dust_amount: float = 0.0,
+    scratches: float = 0.0,
+    stamp_mask: Image.Image = None,
     # 6. Framing
     scale_with_resolution: bool = True,
     seed: int = None,
@@ -260,6 +372,11 @@ def apply_optical_realism(
     # so DOF focus and Light Wrap falloff do not move with it.
     depth_mask = torch.clamp(depth, 0.0, 1.0).unsqueeze(-1)  # 1,H,W,1
     final_image = img_tensor.clone()
+
+    # --- 1b. ON-CAMERA FLASH ---
+    # Light, not optics, so it comes first: everything after sees the lit scene.
+    if flash_strength > 0:
+        final_image = _flash(final_image, depth_mask, flash_strength, flash_reach)
 
     # --- 2. FIELD CURVATURE ---
     if field_curvature > 0:
@@ -488,6 +605,16 @@ def apply_optical_realism(
         vignette_mask = 1.0 - (torch.clamp(radius - 0.4, 0, 1) * vignette_intensity)
         vignette_mask = vignette_mask.unsqueeze(0).unsqueeze(-1)
         final_image = final_image * vignette_mask
+
+    # --- 13b. DUST & SCRATCHES ---
+    # On the film, so after the lens and before the grain.
+    if dust_amount > 0 or scratches > 0:
+        final_image = _dust(final_image, dust_amount, scratches, res_scale, seed)
+
+    # --- 13c. DATE STAMP ---
+    # Exposed by LEDs behind the film: the lens's vignette does not reach it.
+    if stamp_mask is not None:
+        final_image = _stamp(final_image, stamp_mask, res_scale)
 
     # --- 14. FILM GRAIN ---
     if grain_power > 0:

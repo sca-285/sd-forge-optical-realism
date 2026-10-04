@@ -26,7 +26,7 @@ by skatardude10.
 ```
 
 Six tabs, each with its **Enable** box; a freshly ticked tab starts from the
-original node's values. 14 camera presets; a preset ticks the tabs it uses and
+original node's values. 16 camera presets; a preset ticks the tabs it uses and
 unticks the rest, and never touches Intensity or the depth settings.
 
 **Preset reference** unfolds a picture of every preset on three sample photos
@@ -35,7 +35,7 @@ picture to open it full size in a new tab. Click the button again to fold it.
 
 ## Notes
 
-- Depth of field, haze, light wrap and depth-aware blur read a depth map.
+- Depth of field, haze, light wrap, flash and depth-aware blur read a depth map.
   Everything else runs without one. The depth model is parked in system RAM
   between jobs. Choose it under **Depth model**:
 
@@ -63,7 +63,19 @@ picture to open it full size in a new tab. Click the button again to fold it.
 - Bloom, flare, pro-mist, light-wrap and soft-corner blurs run as two 1-D
   passes, and a large depth-of-field disk runs at reduced resolution, so large
   images stay fast.
-- Grain is seeded from the image's seed: the same seed gives the same grain.
+- Grain and dust are seeded from the image's seed: the same seed gives the
+  same grain and the same specks.
+- **Flash** (Optical Effects) is an on-camera flash: near things are lit, the
+  background falls dark with distance. **Flash reach** sets how far it carries.
+- **Dust** and **Scratches** (Film Emulation) print as light marks, most
+  visible in dark areas.
+- **Date stamp** (Film Emulation, folded under *Date stamp*) burns an orange
+  LED date into a corner or along the left edge. Empty text = today's date in
+  the chosen format; it draws digits and `' / . - :` only. Off by default, also
+  in the *Digital Flash* preset. Intensity does not dim it.
+- These are the camera side only. Colour grading (exposure, contrast,
+  split toning) is left to a grading extension such as Digital Mastering,
+  which runs after this one.
 - With Auto depth off and no map supplied, only the depth effects are skipped.
 - *Extra blur* needs `blurgenerator` (installed by `install.py`).
 
@@ -78,12 +90,13 @@ restores it. The older `Geometry(...) | DOF(...)` format still pastes.
 scripts/optical_realism.py   UI + host hooks
 optical_realism_core.py      the optics (pure torch) and the depth model
 lib_or/controls.py           every control, declared once (UI, presets, PNG info)
-lib_or/presets.py            the 14 camera presets
+lib_or/presets.py            the 16 camera presets
 lib_or/layout.py             tabs and guide texts
 lib_or/blur.py               Extra blur via blurgenerator
 lib_or/depth_moge.py         MoGe-3 depth maps
 lib_or/moge/                 MoGe-3 model code (vendored, see its README)
 lib_or/reference.py          the folded preset reference
+lib_or/stamp.py              the seven-segment date stamp
 preset_reference.jpg         the preset reference picture
 style.css                    reference box
 ```

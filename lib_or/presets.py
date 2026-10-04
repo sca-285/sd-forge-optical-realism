@@ -43,6 +43,12 @@ _P = {
         haze=0.60, lift_blacks=0.25, depth_offset=0.0, bloom=0.10, promist=0.10),
     "Backlit Rim Light": dict(
         light_wrap=0.25, bloom=0.10, halation=0.05, highlight_rolloff=0.15),
+    "Dusty Night Film": dict(
+        aperture="f/1.4", bloom=0.20, halation=0.18, promist=0.05, vignette=0.30,
+        temperature=-0.10, tint=-0.05, grain=0.035, dust=0.45, scratches=0.15, highlight_rolloff=0.20),
+    "Digital Flash": dict(
+        flash=0.70, flash_reach=0.45, lens_distortion=0.010, chromatic_aberration=0.002, vignette=0.12,
+        temperature=-0.05, grain=0.020),
 }
 
 PRESETS = {name: compose(p) for name, p in _P.items()}
@@ -63,4 +69,8 @@ DESCRIPTIONS = {
     "Landscape Aerial Haze": "Distant hills fade into atmospheric haze. Needs a depth map (auto).",
     "Foggy Morning": "Thick fog that grows with distance, soft glow.",
     "Backlit Rim Light": "Background light wraps around the subject's edges; backlit look.",
+    "Dusty Night Film": "Night on old film: big bokeh, glowing lights, cool cast, dust and scratches. "
+                        "Needs a depth map (auto).",
+    "Digital Flash": "Compact camera flash: subject lit hard, background falls dark. Needs a depth map "
+                     "(auto).",
 }

@@ -25,6 +25,7 @@ from lib_or.layout import (  # noqa: E402
 )
 from lib_or.presets import CHOICES, CUSTOM, DESCRIPTIONS, NOT_IN_PRESETS, PRESETS  # noqa: E402
 from lib_or.reference import reference_html  # noqa: E402
+from lib_or.stamp import stamp_mask  # noqa: E402
 from lib_or.depth_moge import is_moge  # noqa: E402
 
 if not BLUR_AVAILABLE:
@@ -33,7 +34,7 @@ if not BLUR_AVAILABLE:
 # Effect strengths that Intensity multiplies.
 SCALED = ["lens_distortion", "chromatic_aberration", "field_curvature", "vignette",
           "bloom", "promist", "halation", "flare", "light_wrap", "haze", "lift_blacks",
-          "temperature", "tint", "grain", "highlight_rolloff"]
+          "temperature", "tint", "grain", "highlight_rolloff", "flash", "dust", "scratches"]
 SCALED_INT = ["gaussian_amount", "lens_radius", "motion_size", "max_blur"]
 
 
@@ -42,7 +43,7 @@ def needs_depth(s):
     return bool(
         s["en_dof"]
         or (s["en_atmos"] and (s["haze"] > 0 or s["lift_blacks"] > 0))
-        or (s["en_light"] and s["light_wrap"] > 0)
+        or (s["en_light"] and (s["light_wrap"] > 0 or s["flash"] > 0))
         or (s["en_blur"] and s["blur_depth"])
     )
 
@@ -71,6 +72,9 @@ def render(image, s, depth_map, seed=None):
     v = {n: s[n] * k for n in SCALED}
     for n in SCALED_INT:
         v[n] = max(1, int(round(s[n] * k)))
+    # On or off: Intensity does not dim the stamp.
+    stamp = (stamp_mask(image.size, s["stamp_text"], s["stamp_format"], s["stamp_position"], s["stamp_size"])
+             if s["date_stamp"] else None)
 
     result, warped_depth = apply_optical_realism(
         image=image,
@@ -90,6 +94,8 @@ def render(image, s, depth_map, seed=None):
         light_wrap_strength=v["light_wrap"],
         promist_strength=v["promist"],
         halation_strength=v["halation"],
+        flash_strength=min(v["flash"], 1.5),
+        flash_reach=s["flash_reach"],
         atmosphere_enabled=v["haze"] > 0 or v["lift_blacks"] > 0,
         haze_strength=min(v["haze"], 1.0),
         lift_blacks=min(v["lift_blacks"], 1.0),
@@ -100,6 +106,9 @@ def render(image, s, depth_map, seed=None):
         grain_power=v["grain"],
         monochrome_grain=s["mono_grain"],
         highlight_rolloff=v["highlight_rolloff"],
+        dust_amount=min(v["dust"], 1.5),
+        scratches=min(v["scratches"], 1.0),
+        stamp_mask=stamp,
         scale_with_resolution=s["scale_with_resolution"],
         seed=seed,
     )
@@ -174,6 +183,9 @@ class Script(scripts.Script):
                     with gr.Tab(t["title"]):
                         gr.Markdown(f"*{t['guide']}*")
                         add_all(t["basic"])
+                        if t.get("stamp"):
+                            with gr.Accordion("Date stamp", open=False):
+                                add_all(t["stamp"])
                         if t.get("blur"):
                             add_all(BLUR_BASIC)
                             for btype, names in BLUR_GROUPS.items():
@@ -232,6 +244,9 @@ class Script(scripts.Script):
         info = c.info or None
         if c.kind == "checkbox":
             return gr.Checkbox(label=c.label, value=c.default, elem_id=eid, info=info, visible=visible)
+        if c.kind == "text":
+            return gr.Textbox(label=c.label, value=c.default, elem_id=eid, info=info, visible=visible,
+                              max_lines=1)
         if c.kind == "choice":
             return gr.Dropdown(label=c.label, choices=list(c.choices), value=c.default,
                                elem_id=eid, info=info, visible=visible)
@@ -258,7 +273,8 @@ class Script(scripts.Script):
                 else:
                     print("[Optical Realism] Auto depth is off and no depth map was given; "
                           "depth effects skipped.")
-                    s = settings(s, en_dof=False, en_atmos=False, light_wrap=0.0, blur_depth=False)
+                    s = settings(s, en_dof=False, en_atmos=False, light_wrap=0.0, flash=0.0,
+                                 blur_depth=False)
                     depth_map = Image.new("L", image.size, 128)
             else:
                 # A flat map is inert for every path that reads one.

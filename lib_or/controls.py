@@ -10,6 +10,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from .stamp import FORMATS as STAMP_FORMATS, POSITIONS as STAMP_POSITIONS
+
 APERTURES = ["f/1.2", "f/1.4", "f/1.8", "f/2.0", "f/2.8", "f/3.2", "f/4.0",
              "f/5.6", "f/6.3", "f/8.0", "f/11", "f/16", "f/22", "Manual"]
 BLUR_TYPES = ["Gaussian", "Lens", "Motion"]
@@ -25,7 +27,7 @@ class Control:
     minimum: float = 0.0
     maximum: float = 1.0
     step: float = 0.01
-    kind: str = "slider"          # slider | int | checkbox | choice
+    kind: str = "slider"          # slider | int | checkbox | choice | text
     info: str = ""
     choices: tuple = field(default_factory=tuple)
     neutral: object = None   # value at which it does nothing; None = same as default
@@ -80,6 +82,10 @@ CONTROLS = [
     C("flare", "Lens flare / ghosts", 0.05, 0.0, 1.0, 0.01, neutral=0.0),
     C("light_wrap", "Light wrap", 0.08, 0.0, 1.0, 0.01, info="Background light spilling over the subject's edges.",
       neutral=0.0),
+    C("flash", "Flash", 0.0, 0.0, 1.0, 0.01,
+      info="On-camera flash: lights what is near, the background falls dark. Needs a depth map."),
+    C("flash_reach", "Flash reach", 0.5, 0.0, 1.0, 0.01,
+      info="How far the flash carries. 0 = only the nearest things, 1 = most of the scene."),
     C("haze", "Haze", 0.10, 0.0, 1.0, 0.01, info="Atmospheric fog that grows with distance.", neutral=0.0),
     C("lift_blacks", "Distance lift", 0.05, 0.0, 1.0, 0.01, info="Far shadows wash out to grey.", neutral=0.0),
     C("depth_offset", "Haze start", 0.25, -1.0, 1.0, 0.05, info="Higher pushes haze further back."),
@@ -90,6 +96,14 @@ CONTROLS = [
     C("mono_grain", "Monochrome grain", False, kind="checkbox"),
     C("highlight_rolloff", "Highlight roll-off", 0.10, 0.0, 1.0, 0.01,
       info="Compresses harsh digital whites like film does.", neutral=0.0),
+    C("dust", "Dust", 0.0, 0.0, 1.0, 0.01, info="Specks on the film, light on dark areas. Same seed = same dust."),
+    C("scratches", "Scratches", 0.0, 0.0, 1.0, 0.01, info="Fine vertical lines from the film gate."),
+    C("date_stamp", "Date stamp", False, kind="checkbox", info="Orange LED date of a compact camera."),
+    C("stamp_text", "Stamp text", "", kind="text",
+      info="Digits and ' / . - : only. Empty = today's date in the format below."),
+    C("stamp_format", "Stamp date format", STAMP_FORMATS[0], kind="choice", choices=tuple(STAMP_FORMATS)),
+    C("stamp_position", "Stamp position", STAMP_POSITIONS[0], kind="choice", choices=tuple(STAMP_POSITIONS)),
+    C("stamp_size", "Stamp size", 1.0, 0.5, 2.5, 0.05),
     # --- depth map & settings (not part of a look)
     C("auto_depth", "Auto depth map", True, kind="checkbox",
       info="Estimate depth with Depth Anything V2 or MoGe-3. Off = use the image below."),
@@ -115,11 +129,14 @@ GROUPS = {
     "en_blur": ["blur_type", "blur_depth", "gaussian_amount", "gaussian_sigma", "lens_radius",
                 "lens_components", "exposure_gamma", "motion_size", "motion_angle",
                 "num_layers", "min_blur", "max_blur"],
-    "en_light": ["bloom", "promist", "halation", "flare", "light_wrap"],
+    "en_light": ["bloom", "promist", "halation", "flare", "light_wrap", "flash", "flash_reach"],
     "en_atmos": ["haze", "lift_blacks", "depth_offset"],
-    "en_film": ["temperature", "tint", "grain", "mono_grain", "highlight_rolloff"],
+    "en_film": ["temperature", "tint", "grain", "mono_grain", "highlight_rolloff", "dust", "scratches",
+                "date_stamp", "stamp_text", "stamp_format", "stamp_position", "stamp_size"],
 }
 GROUP_OF = {n: g for g, names in GROUPS.items() for n in names}
+# Written to PNG info only while the stamp is on.
+STAMP_DETAILS = {"stamp_text", "stamp_format", "stamp_position", "stamp_size"}
 
 
 def coerce(name, value):
@@ -131,6 +148,9 @@ def coerce(name, value):
     if c.kind == "choice":
         value = str(value)
         return value if value in c.choices else c.default
+    if c.kind == "text":
+        # PNG info is "k=v; k=v": keep the separators and quotes out.
+        return "".join(ch for ch in str(value) if ch not in ';="\n').strip()[:24]
     v = min(max(float(value), c.minimum), c.maximum)
     return int(round(v)) if c.kind == "int" else v
 
@@ -197,6 +217,8 @@ def to_infotext(s) -> str:
         if g is not None and not s[g]:
             continue
         if g is None and is_default(c.name, s[c.name]):
+            continue
+        if c.name in STAMP_DETAILS and not s["date_stamp"]:
             continue
         v = s[c.name]
         parts.append(f"{c.name}={v:g}" if isinstance(v, float) else f"{c.name}={v}")
