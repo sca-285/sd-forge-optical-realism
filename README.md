@@ -1,4 +1,4 @@
-# Optical Realism
+# Stable Diffusion Optical Realism Adaption for Forge/reForge/Neo
 
 Makes a generated image look photographed: lens traits, depth of field, light
 scatter, haze and film character. Applied to every image after the inpaint
