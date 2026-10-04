@@ -90,9 +90,8 @@ CONTROLS = [
     C("lift_blacks", "Distance lift", 0.05, 0.0, 1.0, 0.01, info="Far shadows wash out to grey.", neutral=0.0),
     C("depth_offset", "Haze start", 0.25, -1.0, 1.0, 0.05, info="Higher pushes haze further back."),
     # --- film & sensor
-    C("temperature", "Temperature", 0.0, -1.0, 1.0, 0.01, info="- cool / + warm"),
-    C("tint", "Tint", 0.0, -1.0, 1.0, 0.01, info="- green / + magenta"),
     C("grain", "Grain", 0.015, 0.0, 0.5, 0.001, info="0.01-0.03 is subtle, 0.05+ is heavy.", neutral=0.0),
+    C("grain_size", "Grain size", 1.0, 0.5, 3.0, 0.1, info="How coarse the grain is. 1 = one pixel."),
     C("mono_grain", "Monochrome grain", False, kind="checkbox"),
     C("highlight_rolloff", "Highlight roll-off", 0.10, 0.0, 1.0, 0.01,
       info="Compresses harsh digital whites like film does.", neutral=0.0),
@@ -131,7 +130,7 @@ GROUPS = {
                 "num_layers", "min_blur", "max_blur"],
     "en_light": ["bloom", "promist", "halation", "flare", "light_wrap", "flash", "flash_reach"],
     "en_atmos": ["haze", "lift_blacks", "depth_offset"],
-    "en_film": ["temperature", "tint", "grain", "mono_grain", "highlight_rolloff", "dust", "scratches",
+    "en_film": ["grain", "grain_size", "mono_grain", "highlight_rolloff", "dust", "scratches",
                 "date_stamp", "stamp_text", "stamp_format", "stamp_position", "stamp_size"],
 }
 GROUP_OF = {n: g for g, names in GROUPS.items() for n in names}
@@ -234,7 +233,8 @@ _LEGACY = [
      ("bloom", "flare", "light_wrap", "promist", "halation")),
     (rf"Atmos\(Haze:{_NUM} Lift:{_NUM} Off:{_NUM}\)", ("haze", "lift_blacks", "depth_offset")),
     (rf"Film\(Vig:{_NUM} Temp:{_NUM} Tint:{_NUM} Grain:{_NUM} Mono:(\w+) Roll:{_NUM}\)",
-     ("vignette", "temperature", "tint", "grain", "mono_grain", "highlight_rolloff")),
+     # Temperature and tint moved to Digital Mastering; old values are dropped.
+     ("vignette", None, None, "grain", "mono_grain", "highlight_rolloff")),
 ]
 
 
@@ -259,6 +259,8 @@ def from_infotext(text):
         if not m:
             continue
         for k, v in zip(names, m.groups()):
+            if k is None:
+                continue
             if k == "focus":
                 if v == "Auto":
                     values["auto_focus"] = True

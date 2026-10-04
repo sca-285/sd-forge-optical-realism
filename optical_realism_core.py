@@ -315,9 +315,8 @@ def apply_optical_realism(
     depth_offset: float = 0.0,
     # 5. Sensor & Film
     vignette_intensity: float = 0.0,
-    color_temperature: float = 0.0,
-    tint: float = 0.0,
     grain_power: float = 0.0,
+    grain_size: float = 1.0,
     monochrome_grain: bool = False,
     highlight_rolloff: float = 0.0,
     dust_amount: float = 0.0,
@@ -414,20 +413,6 @@ def apply_optical_realism(
             depth_mask.permute(0, 3, 1, 2), grid,
             mode="bilinear", padding_mode="reflection", align_corners=False
         ).permute(0, 2, 3, 1)
-
-    # --- 4. WHITE BALANCE (Color Temperature + Tint) ---
-    if abs(color_temperature) > 1e-6 or abs(tint) > 1e-6:
-        r_gain = 1.0 + (color_temperature * 0.15) + (tint * 0.1)
-        g_gain = 1.0 - (tint * 0.15)
-        b_gain = 1.0 - (color_temperature * 0.15) + (tint * 0.1)
-
-        luma_preservation = (0.299 * r_gain + 0.587 * g_gain + 0.114 * b_gain)
-        r_gain /= luma_preservation
-        g_gain /= luma_preservation
-        b_gain /= luma_preservation
-
-        gains = torch.tensor([r_gain, g_gain, b_gain], device=device).view(1, 1, 1, 3)
-        final_image = torch.clamp(final_image * gains, 0.0, 1.0)
 
     # --- 5. DEPTH OF FIELD ---
     if f_stop != "Manual":
@@ -623,9 +608,18 @@ def apply_optical_realism(
         if seed is not None:
             gen = torch.Generator(device=final_image.device)
             gen.manual_seed(int(seed) & 0x7FFFFFFFFFFFFFFF)
-        raw_noise = torch.randn(final_image.shape, generator=gen,
-                                device=final_image.device, dtype=final_image.dtype)
-        raw_noise_p = raw_noise.permute(0, 3, 1, 2)
+        if abs(grain_size - 1.0) < 1e-6:
+            raw_noise = torch.randn(final_image.shape, generator=gen,
+                                    device=final_image.device, dtype=final_image.dtype)
+            raw_noise_p = raw_noise.permute(0, 3, 1, 2)
+        else:
+            # Coarser (or finer) grain: noise on a grid 1/size of the frame,
+            # scaled back up, then brought back to unit strength.
+            gh, gw = max(1, int(round(h / grain_size))), max(1, int(round(w / grain_size)))
+            raw_noise_p = torch.randn((b, c, gh, gw), generator=gen,
+                                      device=final_image.device, dtype=final_image.dtype)
+            raw_noise_p = F.interpolate(raw_noise_p, size=(h, w), mode="bicubic", align_corners=False)
+            raw_noise_p = raw_noise_p / raw_noise_p.std().clamp_min(1e-6)
         clumped = _blur(raw_noise_p, 3, 0.8)
         clumped = clumped.permute(0, 2, 3, 1) * 1.5
 

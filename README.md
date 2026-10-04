@@ -33,6 +33,37 @@ unticks the rest, and never touches Intensity or the depth settings.
 (portrait, still life, night scene). Scroll inside the box, or click the
 picture to open it full size in a new tab. Click the button again to fold it.
 
+## Optical Realism and Digital Mastering
+
+The two extensions split the work the way a photo is made, and no control
+exists in both:
+
+| Optical Realism (runs first) | Digital Mastering (runs second) |
+|---|---|
+| The camera: lens geometry, vignette, depth of field, blur, bloom, flare, halation, light wrap, flash, haze, grain, dust, scratches, date stamp, highlight roll-off | The grade: exposure, contrast, white balance (temperature, tint), saturation, vibrance, split toning, CDL, LUT, selective colour, clarity, sharpen, anti-banding, JPEG repair |
+
+Each preset covers only its own side, so a look is one preset from each. Pairs
+that go together:
+
+| Optical Realism | Digital Mastering |
+|---|---|
+| Subtle Real Camera | Natural: Clean Polish |
+| Portrait 85mm f/1.8 | Portrait: Studio Skin |
+| Portrait f/1.2 Dreamy | Portrait: Soft Glamour |
+| Street 35mm f/5.6 | Natural: Vivid Pop or Film: Cool Slide Stock |
+| Macro Close-up | Natural: HDR Detail |
+| Vintage Lens | Film: Faded Vintage or Film: Instant Photo |
+| Film Camera 35mm | Film: Warm Portrait Stock |
+| Heavy Film Grain | B&W: Classic Silver or B&W: Hard Noir |
+| Pro-Mist Cinema | Cinema: Teal & Orange |
+| Anamorphic Flare | Cinema: Blockbuster |
+| Night City Glow | Mood: Cyberpunk Neon |
+| Landscape Aerial Haze | Mood: Golden Hour |
+| Foggy Morning | Natural: Soft Matte or Mood: Blue Hour |
+| Backlit Rim Light | Mood: Golden Hour |
+| Dusty Night Film | Cinema: Dusty Night or Cinema: Moody Dark |
+| Digital Flash | Mood: Flash Snapshot |
+
 ## Notes
 
 - Depth of field, haze, light wrap, flash and depth-aware blur read a depth map.
@@ -73,9 +104,8 @@ picture to open it full size in a new tab. Click the button again to fold it.
   LED date into a corner or along the left edge. Empty text = today's date in
   the chosen format; it draws digits and `' / . - :` only. Off by default, also
   in the *Digital Flash* preset. Intensity does not dim it.
-- These are the camera side only. Colour grading (exposure, contrast,
-  split toning) is left to a grading extension such as Digital Mastering,
-  which runs after this one.
+- Temperature and tint moved to Digital Mastering; when an older image is
+  pasted they are ignored. **Grain size** (Film Emulation) came the other way.
 - With Auto depth off and no map supplied, only the depth effects are skipped.
 - *Extra blur* needs `blurgenerator` (installed by `install.py`).
 

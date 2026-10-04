@@ -34,7 +34,7 @@ if not BLUR_AVAILABLE:
 # Effect strengths that Intensity multiplies.
 SCALED = ["lens_distortion", "chromatic_aberration", "field_curvature", "vignette",
           "bloom", "promist", "halation", "flare", "light_wrap", "haze", "lift_blacks",
-          "temperature", "tint", "grain", "highlight_rolloff", "flash", "dust", "scratches"]
+          "grain", "highlight_rolloff", "flash", "dust", "scratches"]
 SCALED_INT = ["gaussian_amount", "lens_radius", "motion_size", "max_blur"]
 
 
@@ -101,9 +101,8 @@ def render(image, s, depth_map, seed=None):
         lift_blacks=min(v["lift_blacks"], 1.0),
         depth_offset=s["depth_offset"],
         vignette_intensity=min(v["vignette"], 1.0),
-        color_temperature=v["temperature"],
-        tint=v["tint"],
         grain_power=v["grain"],
+        grain_size=s["grain_size"],
         monochrome_grain=s["mono_grain"],
         highlight_rolloff=v["highlight_rolloff"],
         dust_amount=min(v["dust"], 1.5),
