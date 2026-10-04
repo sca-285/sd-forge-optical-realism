@@ -2,7 +2,7 @@
 
 # Top of the accordion, above the preset.
 DEPTH_CONTROLS = ["auto_depth", "depth_model", "moge_refine", "scale_with_resolution"]
-DEPTH_GUIDE = ("*Depth map is used only by Depth of Field, Atmosphere, Light wrap and depth-aware Blur. "
+DEPTH_GUIDE = ("*Depth map is used only by Depth of Field, Atmosphere, Light wrap, Flash and depth-aware Blur. "
                "Auto = Depth Anything V2 (Small is fastest) or MoGe-3 (sharper subject edges). "
                "Off = upload your own: white near, black far.*")
 
@@ -32,13 +32,16 @@ TABS = [
     {
         "title": "Optical Effects",
         "guide": "Glow and reflections from bright light. Pro-Mist = soft cinema glow; Light wrap suits "
-                 "backlit shots.",
-        "basic": ["en_light", "bloom", "promist", "halation", "flare", "light_wrap"],
+                 "backlit shots; Flash = harsh on-camera flash, dark background.",
+        "basic": ["en_light", "bloom", "promist", "halation", "flare", "light_wrap", "flash", "flash_reach"],
     },
     {
         "title": "Film Emulation",
-        "guide": "Colour temperature and tint, grain (same seed = same grain), softer highlights.",
-        "basic": ["en_film", "temperature", "tint", "grain", "mono_grain", "highlight_rolloff"],
+        "guide": "Colour temperature and tint, grain (same seed = same grain), softer highlights, dust, "
+                 "scratches and a date stamp.",
+        "basic": ["en_film", "temperature", "tint", "grain", "mono_grain", "highlight_rolloff",
+                  "dust", "scratches"],
+        "stamp": ["date_stamp", "stamp_text", "stamp_format", "stamp_position", "stamp_size"],
     },
     {
         "title": "Blur",

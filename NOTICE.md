@@ -13,6 +13,7 @@ a licence, so no licence is granted here for the parts that follow it.
 | `preset_reference.jpg` | New. Rendered with this extension on scikit-image sample photos: Eileen Collins by NASA (public domain), coffee cup by Rachel Michetti (CC0), Falcon 9 launch by SpaceX (public domain). |
 
 | `lib_or/moge/` | Vendored from [microsoft/MoGe](https://github.com/microsoft/MoGe) (MIT; `model/modules/dinov2/` by Meta AI, Apache-2.0). Licence texts in `lib_or/moge/LICENSE`, changes listed in `lib_or/moge/README.md`. |
+| `lib_or/stamp.py` | New: seven-segment date stamp. Flash, dust and scratches in `optical_realism_core.py` are new too. |
 | `lib_or/depth_moge.py` | New: loads MoGe-3 and turns its point map into a depth map. |
 
 Depth maps come from [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2)
