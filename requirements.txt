@@ -1,0 +1,6 @@
+transformers>=4.40.0
+accelerate
+safetensors
+opencv-python
+blurgenerator>=1.0
+scipy
