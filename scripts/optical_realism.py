@@ -7,7 +7,7 @@ import zlib
 
 import gradio as gr
 from PIL import Image
-from modules import devices, scripts
+from modules import devices, script_callbacks, scripts
 from modules.ui_components import InputAccordion
 
 EXTENSION_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,8 +17,8 @@ if EXTENSION_ROOT not in sys.path:
 from optical_realism_core import apply_optical_realism, generate_depth_map, park_depth_pipe  # noqa: E402
 from lib_or.blur import BLUR_AVAILABLE, apply_blur_effect  # noqa: E402
 from lib_or.controls import (  # noqa: E402
-    BY_NAME, INFOTEXT_KEY, NAMES, SETTINGS_ONLY, effective, from_infotext, is_noop, settings,
-    to_infotext,
+    APERTURES, BY_NAME, GROUP_OF, INFOTEXT_KEY, NAMES, SETTINGS_ONLY, coerce, effective, from_infotext, is_noop,
+    settings, to_infotext,
 )
 from lib_or.layout import (  # noqa: E402
     BLUR_BASIC, BLUR_GROUPS, DEPTH_CONTROLS, DEPTH_GUIDE, DEPTH_LAYER_CONTROLS, QUICK_START, TABS,
@@ -27,6 +27,7 @@ from lib_or.presets import CHOICES, CUSTOM, DESCRIPTIONS, NOT_IN_PRESETS, PRESET
 from lib_or.reference import reference_html  # noqa: E402
 from lib_or.stamp import stamp_mask  # noqa: E402
 from lib_or.depth_moge import is_moge  # noqa: E402
+from lib_or import xyz  # noqa: E402
 
 if not BLUR_AVAILABLE:
     print("[Optical Realism] blurgenerator is not installed; 'Extra blur effect' will do nothing.")
@@ -131,6 +132,27 @@ def render(image, s, depth_map, seed=None):
             max_blur=v["max_blur"],
         )
     return result
+
+
+XYZ_ATTR = "_or_xyz"
+
+
+def _register_xyz():
+    xyz.register("OR", XYZ_ATTR, [
+        ("Preset", str, "preset", lambda: list(PRESETS)),
+        ("Intensity", float, "strength", None),
+        ("Aperture", str, "aperture", lambda: list(APERTURES)),
+        ("Bloom", float, "bloom", None),
+        ("Halation", float, "halation", None),
+        ("Grain", float, "grain", None),
+        ("Flash", float, "flash", None),
+        ("Haze", float, "haze", None),
+    ])
+
+
+# Once the scripts are loaded, before the UI is built: the X/Y/Z plot reads its
+# axis list when it builds its own panel.
+script_callbacks.on_before_ui(_register_xyz)
 
 
 class Script(scripts.Script):
@@ -255,9 +277,12 @@ class Script(scripts.Script):
     # After the composite, so lens geometry, DOF and grain apply to the whole
     # picture, not to an inpaint crop.
     def postprocess_image_after_composite(self, p, pp, enabled, depth_image, *values):
-        if not enabled or pp.image is None:
+        axis = xyz.overrides(p, XYZ_ATTR)
+        if not (enabled or axis) or pp.image is None:
             return
         s = settings(dict(zip(NAMES, values)))
+        if axis:
+            s = xyz.merged(s, axis, coerce, BY_NAME, GROUP_OF, PRESETS, NOT_IN_PRESETS)
         if is_noop(s):
             return
 

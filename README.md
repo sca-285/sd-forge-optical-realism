@@ -115,6 +115,14 @@ side, so a look is one preset from each. Pairs that go together:
 - With Auto depth off and no map supplied, only the depth effects are skipped.
 - *Extra blur* needs `blurgenerator` (installed by `install.py`).
 
+## X/Y/Z plot
+
+Axes for the X/Y/Z plot script, under `[OR]`: Preset, Intensity, Aperture,
+Bloom, Halation, Grain, Flash, Haze. A cell that sets any of them switches the
+extension on for that cell, and an axis ticks the tab it belongs to; a Preset
+axis is applied first, then the other axes on top. Pair `[OR] Preset` with
+Digital Mastering's `[DM] Preset` to compare camera and grade combinations.
+
 ## PNG info
 
 One `Optical Realism` entry with the non-default values; Send to / Paste
@@ -133,6 +141,7 @@ lib_or/depth_moge.py         MoGe-3 depth maps
 lib_or/moge/                 MoGe-3 model code (vendored, see its README)
 lib_or/reference.py          the folded preset reference
 lib_or/stamp.py              the seven-segment date stamp
+lib_or/xyz.py                X/Y/Z plot axes
 preset_reference.jpg         the preset reference picture
 style.css                    reference box
 ```
