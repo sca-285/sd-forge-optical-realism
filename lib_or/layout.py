@@ -37,9 +37,9 @@ TABS = [
     },
     {
         "title": "Film Emulation",
-        "guide": "Colour temperature and tint, grain (same seed = same grain), softer highlights, dust, "
-                 "scratches and a date stamp.",
-        "basic": ["en_film", "temperature", "tint", "grain", "mono_grain", "highlight_rolloff",
+        "guide": "Grain (same seed = same grain), softer highlights, dust, scratches and a date stamp. "
+                 "Colour and white balance belong to a grading extension (Digital Mastering).",
+        "basic": ["en_film", "grain", "grain_size", "mono_grain", "highlight_rolloff",
                   "dust", "scratches"],
         "stamp": ["date_stamp", "stamp_text", "stamp_format", "stamp_position", "stamp_size"],
     },
