@@ -59,11 +59,11 @@ side, so a look is one preset from each. Pairs that go together:
 | Street 35mm f/5.6 | Natural: Vivid Pop or Film: Cool Slide Stock |
 | Macro Close-up | Natural: HDR Detail |
 | Vintage Lens | Film: Faded Vintage or Film: Instant Photo |
-| Film Camera 35mm | Film: Warm Portrait Stock |
+| Film Camera 35mm | Film: Portra Golden or Film: Olive Signature |
 | Heavy Film Grain | B&W: Classic Silver or B&W: Hard Noir |
 | Pro-Mist Cinema | Cinema: Teal & Orange |
 | Anamorphic Flare | Cinema: Blockbuster |
-| Night City Glow | Mood: Cyberpunk Neon |
+| Night City Glow | Mood: Cyberpunk Neon or Film: Red Neon Night |
 | Landscape Aerial Haze | Mood: Golden Hour |
 | Foggy Morning | Natural: Soft Matte or Mood: Blue Hour |
 | Backlit Rim Light | Mood: Golden Hour |
