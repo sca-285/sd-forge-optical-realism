@@ -33,17 +33,23 @@ unticks the rest, and never touches Intensity or the depth settings.
 (portrait, still life, night scene). Scroll inside the box, or click the
 picture to open it full size in a new tab. Click the button again to fold it.
 
-## Optical Realism and Digital Mastering
+## Auto Color Corrector, Optical Realism and Digital Mastering
 
-The two extensions split the work the way a photo is made, and no control
-exists in both:
+Three extensions split the work the way a photo is made, and run in this
+order:
 
-| Optical Realism (runs first) | Digital Mastering (runs second) |
-|---|---|
-| The camera: lens geometry, vignette, depth of field, blur, bloom, flare, halation, light wrap, flash, haze, grain, dust, scratches, date stamp, highlight roll-off | The grade: exposure, contrast, white balance (temperature, tint), saturation, vibrance, split toning, CDL, LUT, selective colour, clarity, sharpen, anti-banding, JPEG repair |
+| 1. [Auto Color Corrector](https://github.com/sca-285/sd-forge-auto-color-corrector) | 2. [Optical Realism](https://github.com/sca-285/sd-forge-optical-realism) | 3. [Digital Mastering](https://github.com/sca-285/sd-webui-digital-mastering) |
+|---|---|---|
+| **Correction**, automatic: measures the image and fixes only what is off (colour cast, black and white points, exposure, flat or harsh contrast, dull colour), or matches a reference picture | **The camera**: lens geometry, vignette, depth of field, blur, bloom, flare, halation, light wrap, flash, haze, grain, dust, scratches, date stamp, highlight roll-off | **The grade**, by hand or by preset: exposure, contrast, white balance, saturation, vibrance, split toning, CDL, LUT, selective colour, clarity, sharpen, overlays, anti-banding, JPEG repair |
 
-Each preset covers only its own side, so a look is one preset from each. Pairs
-that go together:
+No two of them do the same job. Auto Color Corrector and Digital Mastering
+both touch exposure and white balance, but for opposite ends: the corrector
+brings a faulty picture back to neutral by itself and leaves a sound one
+alone; Digital Mastering moves a picture away from neutral, on purpose, by
+the amount you set. Correct first, then shoot, then grade.
+
+Optical Realism and Digital Mastering presets each cover only their own
+side, so a look is one preset from each. Pairs that go together:
 
 | Optical Realism | Digital Mastering |
 |---|---|
