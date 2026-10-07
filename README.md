@@ -167,7 +167,7 @@ lib_or/moge/                 MoGe-3 model code (vendored, see its README)
 lib_or/reference.py          the folded preset reference
 lib_or/carousel.py           the preset carousel (HTML)
 javascript/or_carousel.js    the preset carousel (clicks, filter, scroll)
-preset_icons.jpg/.json       the preset icons, one sprite
+preset_icons/                the preset icons, one picture per preset
 lib_or/stamp.py              the seven-segment date stamp
 lib_or/xyz.py                X/Y/Z plot axes
 lib_or/fx.py                 bokeh shapes, streak, star filter, god rays, fringing, tilt-shift, retro video
@@ -187,8 +187,8 @@ style.css                    reference box, preset carousel
 - Sample photos in `preset_reference.jpg`, from scikit-image's sample data:
   Eileen Collins by NASA (public domain), coffee cup by Rachel Michetti (CC0),
   Falcon 9 launch by SpaceX (public domain).
-- Preset icons (`preset_icons.jpg`) use the same sample photos and are set in Bebas Neue, Playfair Display and Space Grotesk
-  (SIL Open Font License 1.1); only the rendered picture is shipped, not the fonts.
+- Preset icons (`preset_icons/`) are set in Bebas Neue (SIL Open Font License 1.1); only the
+  rendered pictures are shipped, not the font.
 
 Thanks also to **Claude**, for help building this
 extension.
