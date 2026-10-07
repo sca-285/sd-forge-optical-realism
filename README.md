@@ -15,8 +15,9 @@ by skatardude10.
 [x] Optical Realism
     [x] Auto depth map  [Depth model v]  (MoGe-3 refine steps)  [x] Scale with resolution
     (your depth map, when Auto is off)
-    Camera preset [..........v]  [Reset]
-    one-line description of the preset
+    [All] [Everyday] [Lens] [Film] [Light] [Night] [Retro]   <- preset groups
+    ‹ [icon] [icon] [icon] [icon] [icon] ... ›               <- preset carousel
+    description of the picked preset          [Reset]
     [▦ Preset reference]             <- click to unfold the picture above
     Intensity  ----o-----            <- scales every effect; 0 = off, 2 = double
     [ Camera & Lens | Atmosphere | Depth of Field | Optical Effects | Film Emulation | Retro Video | Blur ]
@@ -26,8 +27,10 @@ by skatardude10.
 ```
 
 Seven tabs, each with its **Enable** box (Depth of Field also holds Tilt-shift, with its own); a freshly ticked tab starts from the
-original node's values. 24 camera presets; a preset ticks the tabs it uses and
+original node's values. 26 camera presets in six groups; a preset ticks the tabs it uses and
 unticks the rest, and never touches Intensity or the depth settings.
+
+**Picking a preset**: a carousel of small icons, one per preset, each the preset on a sample picture with a short word mark and its group. The chips above it filter by group, the arrows (or a sideways scroll) move along, a click applies the preset. Hover a card for its description.
 
 **Preset reference** unfolds a picture of every preset on three sample photos
 (portrait, still life, night scene). Scroll inside the box, or click the
@@ -156,17 +159,20 @@ restores it. The older `Geometry(...) | DOF(...)` format still pastes.
 scripts/optical_realism.py   UI + host hooks
 optical_realism_core.py      the optics (pure torch) and the depth model
 lib_or/controls.py           every control, declared once (UI, presets, PNG info)
-lib_or/presets.py            the 24 camera presets
+lib_or/presets.py            the 26 camera presets and their groups
 lib_or/layout.py             tabs and guide texts
 lib_or/blur.py               Extra blur via blurgenerator
 lib_or/depth_moge.py         MoGe-3 depth maps
 lib_or/moge/                 MoGe-3 model code (vendored, see its README)
 lib_or/reference.py          the folded preset reference
+lib_or/carousel.py           the preset carousel (HTML)
+javascript/or_carousel.js    the preset carousel (clicks, filter, scroll)
+preset_icons.jpg/.json       the preset icons, one sprite
 lib_or/stamp.py              the seven-segment date stamp
 lib_or/xyz.py                X/Y/Z plot axes
 lib_or/fx.py                 bokeh shapes, streak, star filter, god rays, fringing, tilt-shift, retro video
 preset_reference.jpg         the preset reference picture
-style.css                    reference box
+style.css                    reference box, preset carousel
 ```
 
 ## Credits
@@ -181,6 +187,8 @@ style.css                    reference box
 - Sample photos in `preset_reference.jpg`, from scikit-image's sample data:
   Eileen Collins by NASA (public domain), coffee cup by Rachel Michetti (CC0),
   Falcon 9 launch by SpaceX (public domain).
+- Preset icons (`preset_icons.jpg`) use the same sample photos and are set in Bebas Neue, Playfair Display and Space Grotesk
+  (SIL Open Font License 1.1); only the rendered picture is shipped, not the fonts.
 
 Thanks also to **Claude**, for help building this
 extension.

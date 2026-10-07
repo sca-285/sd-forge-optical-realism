@@ -18,13 +18,13 @@ _P = {
     "Portrait 85mm f/1.8": dict(
         aperture="f/1.8", vignette=0.12, promist=0.03, grain=0.010, highlight_rolloff=0.15),
     "Portrait f/1.2 Dreamy": dict(
-        aperture="f/1.2", promist=0.10, halation=0.05, bloom=0.08, vignette=0.15,
-        highlight_rolloff=0.20),
+        aperture="f/1.2", promist=0.15, halation=0.06, bloom=0.12, vignette=0.15,
+        highlight_rolloff=0.25),
     "Street 35mm f/5.6": dict(
         aperture="f/5.6", lens_distortion=0.010, chromatic_aberration=0.002, vignette=0.15,
         grain=0.020),
     "Macro Close-up": dict(
-        aperture="f/2.0", dof_radius=0.20, vignette=0.10, highlight_rolloff=0.10),
+        aperture="f/1.4", dof_amount=0.5, dof_radius=0.12, vignette=0.10, highlight_rolloff=0.10),
     "Vintage Lens": dict(
         lens_distortion=0.030, field_curvature=0.35, chromatic_aberration=0.006, vignette=0.35,
         halation=0.08, grain=0.030),
@@ -32,13 +32,13 @@ _P = {
         chromatic_aberration=0.002, vignette=0.20, halation=0.08,
         grain=0.040, highlight_rolloff=0.30),
     "Heavy Film Grain": dict(
-        grain=0.060, mono_grain=True, vignette=0.20, highlight_rolloff=0.20),
+        grain=0.080, grain_size=1.6, mono_grain=True, vignette=0.30, highlight_rolloff=0.20),
     "Pro-Mist Cinema": dict(
         promist=0.20, halation=0.10, bloom=0.10, vignette=0.15, highlight_rolloff=0.25),
     "Anamorphic Flare": dict(
         flare=0.25, bloom=0.15, halation=0.06, chromatic_aberration=0.003, vignette=0.20),
     "Night City Glow": dict(
-        bloom=0.25, flare=0.10, halation=0.10, promist=0.10, grain=0.030),
+        bloom=0.35, halation=0.12, promist=0.15, flare=0.10, grain=0.030),
     "Landscape Aerial Haze": dict(
         haze=0.35, lift_blacks=0.10, depth_offset=0.10, chromatic_aberration=0.001,
         highlight_rolloff=0.20),
@@ -62,28 +62,46 @@ _P = {
     "Miniature World": dict(
         tilt_blur=0.70, tilt_position=0.55, tilt_width=0.18),
     "Swirly Vintage Portrait": dict(
-        aperture="f/2.0", bokeh_swirl=0.70, field_curvature=0.30, vignette=0.30, purple_fringe=0.25,
+        aperture="f/1.8", bokeh_swirl=0.90, field_curvature=0.30, vignette=0.30, purple_fringe=0.25,
         halation=0.05, grain=0.020),
     "Soap Bubble Bokeh": dict(
-        aperture="f/2.8", bokeh_rim=0.70, vignette=0.15, grain=0.010),
+        aperture="f/1.8", bokeh_rim=0.90, bloom=0.10, vignette=0.15, grain=0.010),
     "VHS Home Video": dict(
         vhs=0.70, scanlines=0.20, glitch=0.10, highlight_rolloff=0.15),
     "CRT Screen": dict(
         vhs=0.25, scanlines=0.70, scan_pitch=4.0, bloom=0.10, lens_distortion=0.04, vignette=0.30),
+    "Hexagon Night Bokeh": dict(
+        aperture="f/1.4", bokeh_shape="Hexagon (6 blades)", bloom=0.20, halation=0.08, grain=0.020),
+    "Glitch Art": dict(
+        glitch=0.70, vhs=0.30, chromatic_aberration=0.020, lens_distortion=0.0),
 }
 
 PRESETS = {name: compose(p) for name, p in _P.items()}
 CHOICES = [CUSTOM, *PRESETS]
+
+CATEGORIES = {
+    "Subtle Real Camera": "Everyday", "Street 35mm f/5.6": "Everyday",
+    "Portrait 85mm f/1.8": "Lens", "Portrait f/1.2 Dreamy": "Lens", "Macro Close-up": "Lens",
+    "Vintage Lens": "Lens", "Swirly Vintage Portrait": "Lens", "Soap Bubble Bokeh": "Lens",
+    "Hexagon Night Bokeh": "Lens", "Miniature World": "Lens",
+    "Film Camera 35mm": "Film", "Heavy Film Grain": "Film", "Pro-Mist Cinema": "Film",
+    "Dusty Night Film": "Film",
+    "Anamorphic Flare": "Light", "Backlit Rim Light": "Light", "Cathedral Light": "Light",
+    "Landscape Aerial Haze": "Light", "Foggy Morning": "Light",
+    "Night City Glow": "Night", "Anamorphic Night": "Night", "Star Filter Night": "Night",
+    "Digital Flash": "Night",
+    "VHS Home Video": "Retro", "CRT Screen": "Retro", "Glitch Art": "Retro",
+}
 
 DESCRIPTIONS = {
     "Subtle Real Camera": "Barely-there lens traits that take the 'too clean' CG edge off. Safe on anything.",
     "Portrait 85mm f/1.8": "Classic portrait lens: soft background, subject sharp. Needs a depth map (auto).",
     "Portrait f/1.2 Dreamy": "Very shallow focus with a soft glow; romantic portraits.",
     "Street 35mm f/5.6": "Everyday 35mm look: mild distortion and fringing, most of the scene in focus.",
-    "Macro Close-up": "Thin slice of focus, like shooting close to a small subject.",
+    "Macro Close-up": "A paper-thin slice of focus, like shooting close to a small subject. Needs a depth map (auto).",
     "Vintage Lens": "Old glass: soft corners, colour fringing, heavy vignette, red glow.",
     "Film Camera 35mm": "Film camera feel: halation, grain, gentle highlight roll-off.",
-    "Heavy Film Grain": "Strong monochrome grain and vignette; gritty, documentary.",
+    "Heavy Film Grain": "Strong, coarse monochrome grain and a heavy vignette; gritty, documentary.",
     "Pro-Mist Cinema": "Diffusion-filter glow on highlights, softer contrast; cinematic.",
     "Anamorphic Flare": "Lens ghosts and flare from bright lights, with bloom.",
     "Night City Glow": "Glowing lights and halation for night and neon scenes.",
@@ -102,4 +120,6 @@ DESCRIPTIONS = {
     "Soap Bubble Bokeh": "Bright-rimmed bokeh discs, like a Trioplan lens. Needs a depth map (auto).",
     "VHS Home Video": "Home tape: smeared colour, tracking band, faint scanlines, the odd glitch.",
     "CRT Screen": "Shot off an old TV: strong scanlines, bulging glass, dark corners.",
+    "Hexagon Night Bokeh": "Stopped-down vintage lens at night: six-sided bokeh round every light.",
+    "Glitch Art": "Torn, colour-split digital glitches over a soft tape picture."
 }

@@ -23,7 +23,8 @@ from lib_or.controls import (  # noqa: E402
 from lib_or.layout import (  # noqa: E402
     BLUR_BASIC, BLUR_GROUPS, DEPTH_CONTROLS, DEPTH_GUIDE, DEPTH_LAYER_CONTROLS, QUICK_START, TABS,
 )
-from lib_or.presets import CHOICES, CUSTOM, DESCRIPTIONS, NOT_IN_PRESETS, PRESETS  # noqa: E402
+from lib_or.carousel import carousel_html, parse_pick  # noqa: E402
+from lib_or.presets import CATEGORIES, DESCRIPTIONS, NOT_IN_PRESETS, PRESETS  # noqa: E402
 from lib_or.reference import reference_html  # noqa: E402
 from lib_or.stamp import stamp_mask  # noqa: E402
 from lib_or.depth_moge import is_moge  # noqa: E402
@@ -219,11 +220,14 @@ class Script(scripts.Script):
                                    height=200, visible=False, elem_id=f"or_depth_image_{tab}")
             gr.Markdown(DEPTH_GUIDE)
 
-            with gr.Row():
-                preset = gr.Dropdown(label="Camera preset", choices=CHOICES, value=CUSTOM,
-                                     elem_id=f"or_preset_{tab}")
+            gr.HTML(carousel_html(EXTENSION_ROOT, "or", tab, list(PRESETS), CATEGORIES, DESCRIPTIONS),
+                    elem_id=f"or_preset_car_{tab}")
+            pick = gr.Textbox(value="", show_label=False, container=False, elem_id=f"or_preset_pick_{tab}",
+                              elem_classes=["or-pick"])
+            with gr.Row(equal_height=True):
+                about = gr.Markdown("*Pick a camera above, or Reset to start clean.*",
+                                    elem_id=f"or_preset_about_{tab}")
                 reset = gr.Button("Reset", scale=0, min_width=100, elem_id=f"or_reset_{tab}")
-            about = gr.Markdown("", elem_id=f"or_preset_about_{tab}")
             gr.HTML(reference_html(EXTENSION_ROOT, "or-ref", "Optical Realism camera presets"),
                     elem_id=f"or_preset_ref_{tab}")
             add("strength")
@@ -267,16 +271,17 @@ class Script(scripts.Script):
         def values_for(s):
             return [gr.update() if n in NOT_IN_PRESETS else gr.update(value=s[n]) for n in NAMES]
 
-        def apply_preset(name):
+        def apply_preset(value):
+            name = parse_pick(value)
             s = PRESETS.get(name)
             if not s:
-                return [gr.update(value="")] + [gr.update() for _ in NAMES]
-            return [gr.update(value=f"*{DESCRIPTIONS.get(name, '')}*")] + values_for(s)
+                return [gr.update() for _ in range(len(NAMES) + 1)]
+            return [gr.update(value=f"**{name}** · *{DESCRIPTIONS.get(name, '')}*")] + values_for(s)
 
-        preset.change(apply_preset, [preset], [about] + outputs)
-        reset.click(lambda: [gr.update(value=CUSTOM), gr.update(value="")]
+        pick.change(apply_preset, [pick], [about] + outputs)
+        reset.click(lambda: [gr.update(value=""), gr.update(value="*Everything back to neutral.*")]
                     + [gr.update(value=v) for v in settings().values()],
-                    [], [preset, about] + outputs)
+                    [], [pick, about] + outputs)
 
         def field(name):
             def get(params):
