@@ -35,7 +35,8 @@ if not BLUR_AVAILABLE:
 # Effect strengths that Intensity multiplies.
 SCALED = ["lens_distortion", "chromatic_aberration", "field_curvature", "vignette",
           "bloom", "promist", "halation", "flare", "light_wrap", "haze", "lift_blacks",
-          "grain", "highlight_rolloff", "flash", "dust", "scratches"]
+          "grain", "highlight_rolloff", "flash", "dust", "scratches", "purple_fringe", "streak", "star",
+          "rays", "tilt_blur", "vhs", "scanlines", "glitch"]
 SCALED_INT = ["gaussian_amount", "lens_radius", "motion_size", "max_blur"]
 
 
@@ -44,7 +45,7 @@ def needs_depth(s):
     return bool(
         s["en_dof"]
         or (s["en_atmos"] and (s["haze"] > 0 or s["lift_blacks"] > 0))
-        or (s["en_light"] and (s["light_wrap"] > 0 or s["flash"] > 0))
+        or (s["en_light"] and (s["light_wrap"] > 0 or s["flash"] > 0 or s["rays"] > 0))
         or (s["en_blur"] and s["blur_depth"])
     )
 
@@ -90,6 +91,13 @@ def render(image, s, depth_map, seed=None):
         dof_sharpness_radius=s["dof_radius"],
         dof_focus_point=s["focus_point"],
         dof_scale=k,
+        bokeh_shape=s["bokeh_shape"],
+        bokeh_rim=s["bokeh_rim"],
+        bokeh_swirl=s["bokeh_swirl"],
+        tilt_blur=min(v["tilt_blur"], 1.5),
+        tilt_position=s["tilt_position"],
+        tilt_width=s["tilt_width"],
+        tilt_angle=s["tilt_angle"],
         bloom_strength=v["bloom"],
         flare_strength=v["flare"],
         light_wrap_strength=v["light_wrap"],
@@ -97,10 +105,23 @@ def render(image, s, depth_map, seed=None):
         halation_strength=v["halation"],
         flash_strength=min(v["flash"], 1.5),
         flash_reach=s["flash_reach"],
+        streak=min(v["streak"], 1.5),
+        streak_hue=s["streak_hue"],
+        star=min(v["star"], 1.5),
+        star_points=s["star_points"],
+        star_angle=s["star_angle"],
+        star_length=s["star_length"],
+        rays=min(v["rays"], 1.5),
+        rays_length=s["rays_length"],
+        rays_auto=s["rays_auto"],
+        rays_x=s["rays_x"],
+        rays_y=s["rays_y"],
+        purple_fringe=min(v["purple_fringe"], 1.5),
         atmosphere_enabled=v["haze"] > 0 or v["lift_blacks"] > 0,
         haze_strength=min(v["haze"], 1.0),
         lift_blacks=min(v["lift_blacks"], 1.0),
         depth_offset=s["depth_offset"],
+        haze_color=s["haze_color"],
         vignette_intensity=min(v["vignette"], 1.0),
         grain_power=v["grain"],
         grain_size=s["grain_size"],
@@ -109,6 +130,10 @@ def render(image, s, depth_map, seed=None):
         dust_amount=min(v["dust"], 1.5),
         scratches=min(v["scratches"], 1.0),
         stamp_mask=stamp,
+        vhs=min(v["vhs"], 1.0),
+        scanlines=min(v["scanlines"], 1.0),
+        scan_pitch=s["scan_pitch"],
+        glitch=min(v["glitch"], 1.5),
         scale_with_resolution=s["scale_with_resolution"],
         seed=seed,
     )
@@ -147,6 +172,12 @@ def _register_xyz():
         ("Grain", float, "grain", None),
         ("Flash", float, "flash", None),
         ("Haze", float, "haze", None),
+        ("Bokeh shape", str, "bokeh_shape", lambda: list(BY_NAME["bokeh_shape"].choices)),
+        ("Anamorphic streak", float, "streak", None),
+        ("Star filter", float, "star", None),
+        ("God rays", float, "rays", None),
+        ("Tilt-shift blur", float, "tilt_blur", None),
+        ("VHS", float, "vhs", None),
     ])
 
 
@@ -204,9 +235,9 @@ class Script(scripts.Script):
                     with gr.Tab(t["title"]):
                         gr.Markdown(f"*{t['guide']}*")
                         add_all(t["basic"])
-                        if t.get("stamp"):
-                            with gr.Accordion("Date stamp", open=False):
-                                add_all(t["stamp"])
+                        for title, names in t.get("accordions", []):
+                            with gr.Accordion(title, open=False):
+                                add_all(names)
                         if t.get("blur"):
                             add_all(BLUR_BASIC)
                             for btype, names in BLUR_GROUPS.items():
@@ -299,6 +330,7 @@ class Script(scripts.Script):
                           "depth effects skipped.")
                     s = settings(s, en_dof=False, en_atmos=False, light_wrap=0.0, flash=0.0,
                                  blur_depth=False)
+                    # God rays still work on a flat map, only without the far-first weighting.
                     depth_map = Image.new("L", image.size, 128)
             else:
                 # A flat map is inert for every path that reads one.

@@ -4,6 +4,8 @@ import numpy as np
 from PIL import Image
 from modules import devices
 
+from lib_or import fx
+
 # ============================================================
 # Depth Anything V2 (via Transformers)
 # ============================================================
@@ -156,8 +158,11 @@ def _blur(x, kernel_size, sigma):
     return F.conv2d(x, k.view(1, 1, -1, 1).expand(c, 1, -1, 1), groups=c)
 
 
-def _disk_blur(x, radius):
-    """Uniform disk (bokeh) blur. Large radii run at reduced resolution.
+def _disk_blur(x, radius, shape="Round", rim=0.0):
+    """Aperture (bokeh) blur. Large radii run at reduced resolution.
+
+    shape: Round, Oval (anamorphic) or Hexagon (6 blades); rim brightens the
+    edge of each disc, like a soap-bubble lens.
 
     A 101x101 disk at 2048px is ~10k taps per pixel per channel. Above a
     radius of 12 the image is pooled down, blurred with a proportionally
@@ -168,10 +173,8 @@ def _disk_blur(x, radius):
     factor = max(1, int(np.ceil(radius / 12)))
     small = F.avg_pool2d(x, factor, ceil_mode=True) if factor > 1 else x
     r = max(1, int(round(radius / factor)))
-    yy, xx = torch.meshgrid(torch.arange(-r, r + 1, device=x.device),
-                            torch.arange(-r, r + 1, device=x.device), indexing="ij")
-    disk = (xx ** 2 + yy ** 2 <= r ** 2).to(x.dtype)
-    disk = (disk / disk.sum()).view(1, 1, 2 * r + 1, 2 * r + 1).expand(x.shape[1], 1, -1, -1)
+    disk = fx.bokeh_kernel(r, shape, rim, x.device, x.dtype)
+    disk = disk.view(1, 1, 2 * r + 1, 2 * r + 1).expand(x.shape[1], 1, -1, -1)
     out = F.conv2d(F.pad(small, (r, r, r, r), mode="replicate"), disk, groups=x.shape[1])
     if factor > 1:
         out = F.interpolate(out, size=(h, w), mode="bilinear", align_corners=False)
@@ -300,6 +303,13 @@ def apply_optical_realism(
     dof_sharpness_radius: float = 0.35,
     dof_focus_point: float = 0.70,
     dof_scale: float = 1.0,
+    bokeh_shape: str = "Round",
+    bokeh_rim: float = 0.0,
+    bokeh_swirl: float = 0.0,
+    tilt_blur: float = 0.0,
+    tilt_position: float = 0.5,
+    tilt_width: float = 0.2,
+    tilt_angle: float = 0.0,
     # 3. Light Scatters
     bloom_strength: float = 0.0,
     flare_strength: float = 0.0,
@@ -308,11 +318,24 @@ def apply_optical_realism(
     halation_strength: float = 0.0,
     flash_strength: float = 0.0,
     flash_reach: float = 0.5,
+    streak: float = 0.0,
+    streak_hue: float = 0.6,
+    star: float = 0.0,
+    star_points: str = "6",
+    star_angle: float = 15.0,
+    star_length: float = 0.08,
+    rays: float = 0.0,
+    rays_length: float = 0.5,
+    rays_auto: bool = True,
+    rays_x: float = 0.5,
+    rays_y: float = 0.3,
+    purple_fringe: float = 0.0,
     # 4. Atmosphere
     atmosphere_enabled: bool = False,
     haze_strength: float = 0.0,
     lift_blacks: float = 0.0,
     depth_offset: float = 0.0,
+    haze_color: str = "Blue-grey",
     # 5. Sensor & Film
     vignette_intensity: float = 0.0,
     grain_power: float = 0.0,
@@ -322,7 +345,12 @@ def apply_optical_realism(
     dust_amount: float = 0.0,
     scratches: float = 0.0,
     stamp_mask: Image.Image = None,
-    # 6. Framing
+    # 6. Retro video
+    vhs: float = 0.0,
+    scanlines: float = 0.0,
+    scan_pitch: float = 3.0,
+    glitch: float = 0.0,
+    # 7. Framing
     scale_with_resolution: bool = True,
     seed: int = None,
 ):
@@ -452,13 +480,21 @@ def apply_optical_realism(
             target_focus = torch.tensor(dof_focus_point, device=device).view(1, 1, 1, 1)
 
         radius = min(int(25 * res_scale), max(1, int(dof_intensity * 25.0 * res_scale)))
-        blurred_img = _disk_blur(final_image.permute(0, 3, 1, 2), radius).permute(0, 2, 3, 1)
+        blurred_img = _disk_blur(final_image.permute(0, 3, 1, 2), radius, bokeh_shape,
+                                 bokeh_rim).permute(0, 2, 3, 1)
+        if bokeh_swirl > 0:
+            blurred_img = fx.swirl(blurred_img, bokeh_swirl)
 
         dist_from_focus = torch.abs(depth_mask - target_focus)
         blur_mask = torch.clamp(dist_from_focus - dof_sharpness_radius, 0.0, 1.0)
         blur_mask = torch.clamp(blur_mask * 4.0, 0.0, 1.0)
 
         final_image = torch.lerp(final_image, blurred_img, blur_mask)
+
+    # --- 5b. TILT-SHIFT ---
+    if tilt_blur > 0:
+        final_image = fx.tilt_shift(final_image, tilt_blur, tilt_position, tilt_width, tilt_angle,
+                                    blur_fn=_disk_blur, res_scale=res_scale)
 
     # --- 6. ATMOSPHERIC HAZE & LIFT ---
     if atmosphere_enabled:
@@ -467,7 +503,8 @@ def apply_optical_realism(
         
         # A. Atmospheric Fog & Desaturation
         if haze_strength > 0:
-            atmos_color = torch.tensor([0.17, 0.20, 0.26], device=device).view(1, 1, 1, 3)
+            atmos_color = torch.tensor(fx.HAZE_COLOURS.get(haze_color, fx.HAZE_COLOURS["Blue-grey"]),
+                                       device=device).view(1, 1, 1, 3)
             haze_mask = torch.pow(distance_mask, 1.55) * haze_strength
             final_image = torch.lerp(final_image, atmos_color, haze_mask)
 
@@ -483,6 +520,12 @@ def apply_optical_realism(
             local_lift = distance_mask * (lift_blacks * 0.5)
             
             final_image = final_image * (1.0 - local_lift) + local_lift
+
+    # --- 6b. GOD RAYS ---
+    # After the haze, so the rays carry through it.
+    if rays > 0:
+        centre = None if rays_auto else (rays_x, rays_y)
+        final_image = fx.god_rays(final_image, depth_mask, rays, rays_length, centre, res_scale)
 
     # --- 7. LIGHT WRAP ---
     if light_wrap_strength > 0:
@@ -533,6 +576,12 @@ def apply_optical_realism(
 
         final_image = 1.0 - (1.0 - final_image) * (1.0 - torch.clamp(combined_flare * flare_strength, 0.0, 1.0))
 
+    # --- 9b. ANAMORPHIC STREAK & STAR FILTER ---
+    if streak > 0:
+        final_image = fx.anamorphic_streak(final_image, streak, streak_hue, res_scale)
+    if star > 0:
+        final_image = fx.star_filter(final_image, star, star_points, star_angle, star_length, res_scale)
+
     # --- 10. PRO-MIST ---
     if promist_strength > 0:
         img_permuted = final_image.permute(0, 3, 1, 2)
@@ -581,6 +630,10 @@ def apply_optical_realism(
             final_image[..., 1:2],
             b_sampled.permute(0, 2, 3, 1)
         ), dim=-1)
+
+    # --- 12b. PURPLE FRINGING ---
+    if purple_fringe > 0:
+        final_image = fx.purple_fringe(final_image, purple_fringe, res_scale)
 
     # --- 13. VIGNETTE ---
     if vignette_intensity > 0:
@@ -637,6 +690,15 @@ def apply_optical_realism(
     # --- 15. HIGHLIGHT ROLL-OFF ---
     if highlight_rolloff > 0:
         final_image = final_image / (1.0 + final_image * highlight_rolloff * 0.5)
+
+    # --- 16. RETRO VIDEO ---
+    # Last: the tape or the screen records the finished picture.
+    if vhs > 0:
+        final_image = fx.vhs(torch.clamp(final_image, 0.0, 1.0), vhs, res_scale, seed)
+    if glitch > 0:
+        final_image = fx.glitch(final_image, glitch, seed)
+    if scanlines > 0:
+        final_image = fx.scanlines(final_image, scanlines, scan_pitch, res_scale)
 
     final_image = torch.clamp(final_image, 0.0, 1.0)
     result = tensor_to_pil(final_image)

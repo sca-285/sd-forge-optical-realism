@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from .fx import BOKEH_SHAPES, HAZE_COLOURS, STAR_POINTS
 from .stamp import FORMATS as STAMP_FORMATS, POSITIONS as STAMP_POSITIONS
 
 APERTURES = ["f/1.2", "f/1.4", "f/1.8", "f/2.0", "f/2.8", "f/3.2", "f/4.0",
@@ -45,6 +46,8 @@ CONTROLS = [
     C("en_light", "Enable Optical Effects", False, kind="checkbox"),
     C("en_atmos", "Enable Atmosphere / Haze", False, kind="checkbox"),
     C("en_film", "Enable Film Emulation", False, kind="checkbox"),
+    C("en_tilt", "Enable Tilt-shift", False, kind="checkbox"),
+    C("en_retro", "Enable Retro Video", False, kind="checkbox"),
     # --- lens
     C("lens_distortion", "Distortion", 0.005, -0.5, 0.5, 0.001, info="+ barrel (bulges out) / - pincushion",
       neutral=0.0),
@@ -53,6 +56,8 @@ CONTROLS = [
     C("field_curvature", "Soft corners", 0.15, 0.0, 1.0, 0.01, info="Field curvature: corners drift out of focus.",
       neutral=0.0),
     C("vignette", "Vignette", 0.15, 0.0, 1.0, 0.01, info="Darker corners.", neutral=0.0),
+    C("purple_fringe", "Purple fringing", 0.0, 0.0, 1.0, 0.01,
+      info="Violet edge just outside very bright areas, as on fast or old lenses."),
     # --- focus
     C("aperture", "Aperture", "f/5.6", kind="choice", choices=tuple(APERTURES),
       info="Lower f-number = shallower focus, blurrier background."),
@@ -60,6 +65,11 @@ CONTROLS = [
     C("focus_point", "Manual focus depth", 0.70, 0.0, 1.0, 0.01, info="1 = nearest, 0 = farthest."),
     C("dof_amount", "Extra background blur", 0.0, 0.0, 1.0, 0.01,
       info="With an f-stop: added on top (0.5 = 50% more). With Manual: the blur amount itself."),
+    C("bokeh_shape", "Bokeh shape", BOKEH_SHAPES[0], kind="choice", choices=tuple(BOKEH_SHAPES),
+      info="Oval = anamorphic lens, Hexagon = a 6-blade aperture."),
+    C("bokeh_rim", "Bokeh rim", 0.0, 0.0, 1.0, 0.01, info="Bright edges on each disc: soap-bubble lenses."),
+    C("bokeh_swirl", "Swirl / cat-eye", 0.0, 0.0, 1.0, 0.01,
+      info="Background swirls round the centre, discs turn cat-eye at the edges (Helios)."),
     C("dof_radius", "In-focus depth", 0.35, 0.0, 1.0, 0.01,
       info="How much depth around the focus stays sharp. 0.35 = the f-stop's own."),
     C("blur_type", "Blur type", "Gaussian", kind="choice", choices=tuple(BLUR_TYPES)),
@@ -84,11 +94,38 @@ CONTROLS = [
       neutral=0.0),
     C("flash", "Flash", 0.0, 0.0, 1.0, 0.01,
       info="On-camera flash: lights what is near, the background falls dark. Needs a depth map."),
+    C("streak", "Anamorphic streak", 0.0, 0.0, 1.0, 0.01,
+      info="Long horizontal flare line through bright lights."),
+    C("streak_hue", "Streak colour", 0.6, 0.0, 1.0, 0.01, info="0.6 = the classic blue."),
+    C("star", "Star filter", 0.0, 0.0, 1.0, 0.01, info="Rays from bright points, like a cross-screen filter."),
+    C("star_points", "Star points", STAR_POINTS[1], kind="choice", choices=tuple(STAR_POINTS)),
+    C("star_angle", "Star angle", 15.0, 0.0, 90.0, 1.0),
+    C("star_length", "Star length", 0.08, 0.02, 0.25, 0.01, info="As a share of the long side."),
+    C("rays", "God rays", 0.0, 0.0, 1.0, 0.01,
+      info="Light shafts from the brightest source; far bright areas (sky, windows) feed them most."),
+    C("rays_length", "Ray length", 0.5, 0.1, 1.0, 0.01),
+    C("rays_auto", "Find the light source", True, kind="checkbox",
+      info="Off = place it with X / Y below."),
+    C("rays_x", "Light X", 0.5, 0.0, 1.0, 0.01),
+    C("rays_y", "Light Y", 0.3, 0.0, 1.0, 0.01),
     C("flash_reach", "Flash reach", 0.5, 0.0, 1.0, 0.01,
       info="How far the flash carries. 0 = only the nearest things, 1 = most of the scene."),
     C("haze", "Haze", 0.10, 0.0, 1.0, 0.01, info="Atmospheric fog that grows with distance.", neutral=0.0),
     C("lift_blacks", "Distance lift", 0.05, 0.0, 1.0, 0.01, info="Far shadows wash out to grey.", neutral=0.0),
     C("depth_offset", "Haze start", 0.25, -1.0, 1.0, 0.05, info="Higher pushes haze further back."),
+    C("haze_color", "Haze colour", "Blue-grey", kind="choice", choices=tuple(HAZE_COLOURS)),
+    # --- tilt-shift
+    C("tilt_blur", "Tilt-shift blur", 0.6, 0.0, 1.0, 0.01, neutral=0.0,
+      info="A band of focus with blur growing away from it: the miniature look."),
+    C("tilt_position", "Focus band position", 0.55, 0.0, 1.0, 0.01, info="0 top, 1 bottom."),
+    C("tilt_width", "Focus band width", 0.20, 0.02, 0.8, 0.01),
+    C("tilt_angle", "Band angle", 0.0, -45.0, 45.0, 1.0),
+    # --- retro video
+    C("vhs", "VHS", 0.6, 0.0, 1.0, 0.01, neutral=0.0,
+      info="Smeared, shifted colour, tape noise and a tracking band."),
+    C("scanlines", "CRT scanlines", 0.0, 0.0, 1.0, 0.01),
+    C("scan_pitch", "Scanline spacing", 3.0, 2.0, 8.0, 0.5, info="Pixels between lines at 1024 px."),
+    C("glitch", "Glitch", 0.0, 0.0, 1.0, 0.01, info="Torn slices and split colour. Same seed = same glitch."),
     # --- film & sensor
     C("grain", "Grain", 0.015, 0.0, 0.5, 0.001, info="0.01-0.03 is subtle, 0.05+ is heavy.", neutral=0.0),
     C("grain_size", "Grain size", 1.0, 0.5, 3.0, 0.1, info="How coarse the grain is. 1 = one pixel."),
@@ -123,13 +160,18 @@ SETTINGS_ONLY = {"auto_depth", "depth_model", "moge_refine", "scale_with_resolut
 
 # Each Enable box and the controls it switches.
 GROUPS = {
-    "en_lens": ["lens_distortion", "chromatic_aberration", "field_curvature", "vignette"],
-    "en_dof": ["aperture", "auto_focus", "focus_point", "dof_amount", "dof_radius"],
+    "en_lens": ["lens_distortion", "chromatic_aberration", "field_curvature", "vignette", "purple_fringe"],
+    "en_dof": ["aperture", "auto_focus", "focus_point", "dof_amount", "dof_radius", "bokeh_shape", "bokeh_rim",
+               "bokeh_swirl"],
+    "en_tilt": ["tilt_blur", "tilt_position", "tilt_width", "tilt_angle"],
+    "en_retro": ["vhs", "scanlines", "scan_pitch", "glitch"],
     "en_blur": ["blur_type", "blur_depth", "gaussian_amount", "gaussian_sigma", "lens_radius",
                 "lens_components", "exposure_gamma", "motion_size", "motion_angle",
                 "num_layers", "min_blur", "max_blur"],
-    "en_light": ["bloom", "promist", "halation", "flare", "light_wrap", "flash", "flash_reach"],
-    "en_atmos": ["haze", "lift_blacks", "depth_offset"],
+    "en_light": ["bloom", "promist", "halation", "flare", "light_wrap", "flash", "flash_reach", "streak",
+                 "streak_hue", "star", "star_points", "star_angle", "star_length", "rays", "rays_length",
+                 "rays_auto", "rays_x", "rays_y"],
+    "en_atmos": ["haze", "lift_blacks", "depth_offset", "haze_color"],
     "en_film": ["grain", "grain_size", "mono_grain", "highlight_rolloff", "dust", "scratches",
                 "date_stamp", "stamp_text", "stamp_format", "stamp_position", "stamp_size"],
 }

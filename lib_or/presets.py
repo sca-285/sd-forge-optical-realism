@@ -52,6 +52,24 @@ _P = {
     "Digital Flash": dict(
         flash=0.70, flash_reach=0.45, lens_distortion=0.010, chromatic_aberration=0.002, vignette=0.12,
         grain=0.020),
+    "Anamorphic Night": dict(
+        aperture="f/1.8", bokeh_shape="Oval (anamorphic)", streak=0.55, bloom=0.15, halation=0.08,
+        grain=0.020),
+    "Star Filter Night": dict(
+        star=0.60, star_points="6", bloom=0.10, halation=0.05, grain=0.015),
+    "Cathedral Light": dict(
+        rays=0.60, rays_length=0.6, haze=0.25, haze_color="Warm morning", bloom=0.08, promist=0.05),
+    "Miniature World": dict(
+        tilt_blur=0.70, tilt_position=0.55, tilt_width=0.18),
+    "Swirly Vintage Portrait": dict(
+        aperture="f/2.0", bokeh_swirl=0.70, field_curvature=0.30, vignette=0.30, purple_fringe=0.25,
+        halation=0.05, grain=0.020),
+    "Soap Bubble Bokeh": dict(
+        aperture="f/2.8", bokeh_rim=0.70, vignette=0.15, grain=0.010),
+    "VHS Home Video": dict(
+        vhs=0.70, scanlines=0.20, glitch=0.10, highlight_rolloff=0.15),
+    "CRT Screen": dict(
+        vhs=0.25, scanlines=0.70, scan_pitch=4.0, bloom=0.10, lens_distortion=0.04, vignette=0.30),
 }
 
 PRESETS = {name: compose(p) for name, p in _P.items()}
@@ -76,4 +94,12 @@ DESCRIPTIONS = {
                         "Needs a depth map (auto).",
     "Digital Flash": "Compact camera flash: subject lit hard, background falls dark. Needs a depth map "
                      "(auto).",
+    "Anamorphic Night": "Anamorphic lens at night: oval bokeh, blue horizontal streaks through the lights.",
+    "Star Filter Night": "Cross-screen filter: six-point stars on every bright light.",
+    "Cathedral Light": "Light shafts through warm haze, as through a high window. Needs a depth map (auto).",
+    "Miniature World": "Tilt-shift: a thin band of focus, the rest blurred, so the scene looks like a model.",
+    "Swirly Vintage Portrait": "Old Soviet lens: the background swirls, soft corners, purple fringes. Needs a depth map (auto).",
+    "Soap Bubble Bokeh": "Bright-rimmed bokeh discs, like a Trioplan lens. Needs a depth map (auto).",
+    "VHS Home Video": "Home tape: smeared colour, tracking band, faint scanlines, the odd glitch.",
+    "CRT Screen": "Shot off an old TV: strong scanlines, bulging glass, dark corners.",
 }

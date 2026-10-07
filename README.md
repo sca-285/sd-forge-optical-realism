@@ -19,14 +19,14 @@ by skatardude10.
     one-line description of the preset
     [▦ Preset reference]             <- click to unfold the picture above
     Intensity  ----o-----            <- scales every effect; 0 = off, 2 = double
-    [ Camera & Lens | Atmosphere | Depth of Field | Optical Effects | Film Emulation | Blur ]
+    [ Camera & Lens | Atmosphere | Depth of Field | Optical Effects | Film Emulation | Retro Video | Blur ]
       one-line hint
       [x] Enable ...                 <- one per tab
       the controls
 ```
 
-Six tabs, each with its **Enable** box; a freshly ticked tab starts from the
-original node's values. 16 camera presets; a preset ticks the tabs it uses and
+Seven tabs, each with its **Enable** box (Depth of Field also holds Tilt-shift, with its own); a freshly ticked tab starts from the
+original node's values. 24 camera presets; a preset ticks the tabs it uses and
 unticks the rest, and never touches Intensity or the depth settings.
 
 **Preset reference** unfolds a picture of every preset on three sample photos
@@ -70,9 +70,30 @@ side, so a look is one preset from each. Pairs that go together:
 | Dusty Night Film | Cinema: Dusty Night or Cinema: Moody Dark |
 | Digital Flash | Mood: Flash Snapshot |
 
+## Lens character, filters and retro video
+
+| Where | Effect | What it does |
+|---|---|---|
+| Camera & Lens | **Purple fringing** | A violet edge just outside very bright areas, as on fast or old lenses |
+| Atmosphere | **Haze colour** | Blue-grey (as before), warm morning, white mist, smoke or dusk violet |
+| Depth of Field | **Bokeh shape** | Round, oval (anamorphic: taller than wide) or hexagon (6 blades) |
+| Depth of Field | **Bokeh rim** | Bright-edged discs, like a soap-bubble (Trioplan) lens |
+| Depth of Field | **Swirl / cat-eye** | The background swirls round the centre, discs turn cat-eye at the edges (Helios) |
+| Depth of Field | **Tilt-shift** | A band of focus with blur growing away from it: the miniature look |
+| Optical Effects | **Anamorphic streak** | A long horizontal flare line through each bright light, blue by default |
+| Optical Effects | **Star filter** | 4, 6 or 8-point rays from the brightest points (cross-screen filter) |
+| Optical Effects | **God rays** | Light shafts from the strongest light, found automatically or placed by hand; far bright areas feed them most (uses the depth map) |
+| Retro Video | **VHS** | Colour smeared and shifted against a softer picture, tape noise, tracking band |
+| Retro Video | **CRT scanlines** | Scanlines, picture lifted to keep its brightness |
+| Retro Video | **Glitch** | Torn slices and split colour; same seed, same glitch |
+
+Retro video runs last, over everything else: the tape or the screen records the
+finished picture. The streak, star filter and god rays are worked out at reduced
+resolution, so large frames stay fast.
+
 ## Notes
 
-- Depth of field, haze, light wrap, flash and depth-aware blur read a depth map.
+- Depth of field, haze, light wrap, flash, god rays and depth-aware blur read a depth map.
   Everything else runs without one. The depth model is parked in system RAM
   between jobs. Choose it under **Depth model**:
 
@@ -118,7 +139,8 @@ side, so a look is one preset from each. Pairs that go together:
 ## X/Y/Z plot
 
 Axes for the X/Y/Z plot script, under `[OR]`: Preset, Intensity, Aperture,
-Bloom, Halation, Grain, Flash, Haze. A cell that sets any of them switches the
+Bloom, Halation, Grain, Flash, Haze, Bokeh shape, Anamorphic streak, Star
+filter, God rays, Tilt-shift blur, VHS. A cell that sets any of them switches the
 extension on for that cell, and an axis ticks the tab it belongs to; a Preset
 axis is applied first, then the other axes on top. Pair `[OR] Preset` with
 Digital Mastering's `[DM] Preset` to compare camera and grade combinations.
@@ -134,7 +156,7 @@ restores it. The older `Geometry(...) | DOF(...)` format still pastes.
 scripts/optical_realism.py   UI + host hooks
 optical_realism_core.py      the optics (pure torch) and the depth model
 lib_or/controls.py           every control, declared once (UI, presets, PNG info)
-lib_or/presets.py            the 16 camera presets
+lib_or/presets.py            the 24 camera presets
 lib_or/layout.py             tabs and guide texts
 lib_or/blur.py               Extra blur via blurgenerator
 lib_or/depth_moge.py         MoGe-3 depth maps
@@ -142,6 +164,7 @@ lib_or/moge/                 MoGe-3 model code (vendored, see its README)
 lib_or/reference.py          the folded preset reference
 lib_or/stamp.py              the seven-segment date stamp
 lib_or/xyz.py                X/Y/Z plot axes
+lib_or/fx.py                 bokeh shapes, streak, star filter, god rays, fringing, tilt-shift, retro video
 preset_reference.jpg         the preset reference picture
 style.css                    reference box
 ```
