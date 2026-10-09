@@ -5,11 +5,11 @@ Each icon is a photo from the [Open Images](https://storage.googleapis.com/openi
 | Preset | Photo | Author |
 |---|---|---|
 | Subtle Real Camera | [DSC_0182](https://www.flickr.com/photos/sarlab/5037258102) | Ryan &amp; Sarah Meis |
-| Portrait 85mm f/1.8 | [80039 邱議瑩](https://www.flickr.com/photos/88876302@N08/8098528008) | OpenTaiwan |
+| Portrait 85mm f/1.8 | [Mildred_9232](https://www.flickr.com/photos/mejiaperalta/2338879397) | Jorge Mejía peralta |
 | Portrait f/1.2 Dreamy | [Sunset Cliffs](https://www.flickr.com/photos/jon-clark/6268920657) | Jon Lee Clark |
 | Street 35mm f/5.6 | [Marching Throngs of People](https://www.flickr.com/photos/seiya235/77405611) | Carter McKendry |
 | Macro Close-up | [The Lady in Red](https://www.flickr.com/photos/hamed/154621901) | Hamed Saber |
-| Vintage Lens | [Nick Jago playing his guitar after the show](https://www.flickr.com/photos/porcupiny/563048587) | porcupiny |
+| Vintage Lens | [Sound Check](https://www.flickr.com/photos/powerbooktrance/457354973) | Terry Johnston |
 | Film Camera 35mm | [Picture_343](https://www.flickr.com/photos/pattista/222358755) | Patty |
 | Heavy Film Grain | [Solstice Slam](https://www.flickr.com/photos/jkbrooks85/14484017991) | James Brooks |
 | Pro-Mist Cinema | [the game of dreidel](https://www.flickr.com/photos/wwworks/5245637918) | woodleywonderworks |
