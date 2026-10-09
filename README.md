@@ -27,7 +27,7 @@ by skatardude10.
 ```
 
 Seven tabs, each with its **Enable** box (Depth of Field also holds Tilt-shift, with its own); a freshly ticked tab starts from the
-original node's values. 26 camera presets in six groups; a preset ticks the tabs it uses and
+original node's values. 28 camera presets in six groups; a preset ticks the tabs it uses and
 unticks the rest, and never touches Intensity or the depth settings.
 
 **Picking a preset**: a carousel of small icons, one per preset, each the preset on a sample picture with a short word mark and its group. The chips above it filter by group, the arrows (or a sideways scroll) move along, a click applies the preset. Hover a card for its description.
@@ -94,6 +94,11 @@ Retro video runs last, over everything else: the tape or the screen records the
 finished picture. The streak, star filter and god rays are worked out at reduced
 resolution, so large frames stay fast.
 
+*Retro Glass* and *Retro Glass Deep* pair old-lens colour fringes (0.006) and
+film grain (0.04) with the Blur tab's depth-aware lens blur, far blur 2 and 4:
+the background eases off while the subject stays sharp. They need
+*blurgenerator*, like the Blur tab.
+
 ## Notes
 
 - Depth of field, haze, light wrap, flash, god rays and depth-aware blur read a depth map.
@@ -159,7 +164,7 @@ restores it. The older `Geometry(...) | DOF(...)` format still pastes.
 scripts/optical_realism.py   UI + host hooks
 optical_realism_core.py      the optics (pure torch) and the depth model
 lib_or/controls.py           every control, declared once (UI, presets, PNG info)
-lib_or/presets.py            the 26 camera presets and their groups
+lib_or/presets.py            the 28 camera presets and their groups
 lib_or/layout.py             tabs and guide texts
 lib_or/blur.py               Extra blur via blurgenerator
 lib_or/depth_moge.py         MoGe-3 depth maps

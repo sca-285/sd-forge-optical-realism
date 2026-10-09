@@ -30,3 +30,5 @@ Each icon is a photo from the [Open Images](https://storage.googleapis.com/openi
 | CRT Screen | [DSC_0016](https://www.flickr.com/photos/andybeatty/4131788175) | Andy Beatty |
 | Hexagon Night Bokeh | [Leipzig nightlife (LGM 2014)](https://www.flickr.com/photos/kinetoskop/13693226785) | Manuel Schmalstieg |
 | Glitch Art | [Huge Flat Panel Display](https://www.flickr.com/photos/mrbill/274832860) | Bill Bradford |
+| Retro Glass | [IMG_1076](https://www.flickr.com/photos/visentico/7187403444) | Sento |
+| Retro Glass Deep | [POR 0452](https://www.flickr.com/photos/hydropeek/2563686098/) | hydropeek |

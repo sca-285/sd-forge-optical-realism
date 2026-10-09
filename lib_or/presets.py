@@ -74,6 +74,14 @@ _P = {
         aperture="f/1.4", bokeh_shape="Hexagon (6 blades)", bloom=0.20, halation=0.08, grain=0.020),
     "Glitch Art": dict(
         glitch=0.70, vhs=0.30, chromatic_aberration=0.020, lens_distortion=0.0),
+    # Old glass on a film body, with the background eased off by a depth-aware
+    # lens blur (the Blur tab, needs blurgenerator): far blur 2 and 4.
+    "Retro Glass": dict(
+        chromatic_aberration=0.006, grain=0.040, vignette=0.15, highlight_rolloff=0.20,
+        blur_type="Lens", blur_depth=True, min_blur=0, max_blur=2),
+    "Retro Glass Deep": dict(
+        chromatic_aberration=0.006, grain=0.040, vignette=0.20, halation=0.06, highlight_rolloff=0.25,
+        blur_type="Lens", blur_depth=True, min_blur=0, max_blur=4),
 }
 
 PRESETS = {name: compose(p) for name, p in _P.items()}
@@ -91,6 +99,7 @@ CATEGORIES = {
     "Night City Glow": "Night", "Anamorphic Night": "Night", "Star Filter Night": "Night",
     "Digital Flash": "Night",
     "VHS Home Video": "Retro", "CRT Screen": "Retro", "Glitch Art": "Retro",
+    "Retro Glass": "Film", "Retro Glass Deep": "Film",
 }
 
 DESCRIPTIONS = {
@@ -121,5 +130,7 @@ DESCRIPTIONS = {
     "VHS Home Video": "Home tape: smeared colour, tracking band, faint scanlines, the odd glitch.",
     "CRT Screen": "Shot off an old TV: strong scanlines, bulging glass, dark corners.",
     "Hexagon Night Bokeh": "Stopped-down vintage lens at night: six-sided bokeh round every light.",
-    "Glitch Art": "Torn, colour-split digital glitches over a soft tape picture."
+    "Glitch Art": "Torn, colour-split digital glitches over a soft tape picture.",
+    "Retro Glass": "Colour fringes and film grain, the background softly lens-blurred by depth (far blur 2).",
+    "Retro Glass Deep": "The same old glass with a stronger depth lens blur (far blur 4) and a little halation.",
 }
