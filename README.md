@@ -51,27 +51,86 @@ brings a faulty picture back to neutral by itself and leaves a sound one
 alone; Digital Mastering moves a picture away from neutral, on purpose, by
 the amount you set. Correct first, then shoot, then grade.
 
-Optical Realism and Digital Mastering presets each cover only their own
-side, so a look is one preset from each. Pairs that go together:
+## Combining presets
 
-| Optical Realism | Digital Mastering |
-|---|---|
-| Subtle Real Camera | Natural: Clean Polish |
-| Portrait 85mm f/1.8 | Portrait: Studio Skin |
-| Portrait f/1.2 Dreamy | Portrait: Soft Glamour |
-| Street 35mm f/5.6 | Natural: Vivid Pop or Film: Cool Slide Stock |
-| Macro Close-up | Natural: HDR Detail |
-| Vintage Lens | Film: Faded Vintage or Film: Instant Photo |
-| Film Camera 35mm | Film: Portra Golden or Film: Olive Signature |
-| Heavy Film Grain | B&W: Classic Silver or B&W: Hard Noir |
-| Pro-Mist Cinema | Cinema: Teal & Orange |
-| Anamorphic Flare | Cinema: Blockbuster |
-| Night City Glow | Mood: Cyberpunk Neon or Film: Red Neon Night |
-| Landscape Aerial Haze | Mood: Golden Hour |
-| Foggy Morning | Natural: Soft Matte or Mood: Blue Hour |
-| Backlit Rim Light | Mood: Golden Hour |
-| Dusty Night Film | Cinema: Dusty Night or Cinema: Moody Dark |
-| Digital Flash | Mood: Flash Snapshot |
+Each extension's presets cover only its own side, so a finished look is one
+preset from each, in the order they run: Auto Color Corrector cleans up, Optical
+Realism adds the camera, Digital Mastering grades. Leave out any of the three
+you do not need.
+
+### Recipes
+
+Complete looks, from the first extension to the last.
+
+| Look | Auto Color Corrector | Optical Realism | Digital Mastering |
+|---|---|---|---|
+| Clean commercial portrait | Natural | Portrait 85mm f/1.8 | Portrait: Studio Skin |
+| Fashion editorial | Natural | Retro Glass | Portrait: Editorial Crisp |
+| Bridal, dreamy | Gentle | Portrait f/1.2 Dreamy | Portrait: Soft Glamour |
+| Backlit at golden hour | Keep the Mood | Backlit Rim Light | Mood: Golden Hour |
+| Contemporary film portrait | Natural | Retro Glass Deep | Film: Portra Golden |
+| 35 mm travel snapshot | Natural | Film Camera 35mm | Film: Travel Ektar |
+| Sixties holiday slide | Natural | Street 35mm f/5.6 | Film: Kodachrome |
+| Hong Kong neon night | Keep the Mood | Night City Glow | Auteur: Chungking Neon |
+| Lamp-lit interior, romance | Keep the Mood | Pro-Mist Cinema | Auteur: Mood for Love |
+| Rainy city at night | Keep the Mood | Anamorphic Night | Auteur: Saigon Rain |
+| Summer blockbuster | Standard | Anamorphic Flare | Cinema: Blockbuster |
+| Neo-noir detective | Keep the Mood | Dusty Night Film | Cinema: Neo-Noir Blue |
+| Classic black & white | Standard | Heavy Film Grain | B&W: Classic Silver |
+| Mountain landscape | Standard | Landscape Aerial Haze | Film: Velvia |
+| Misty northern coast | Keep the Mood | Foggy Morning | Auteur: Nordic Noir |
+| Day for night | Natural | Subtle Real Camera | Cinema: Day for Night |
+| House party | Natural | Digital Flash | Mood: Flash Snapshot |
+| Nineties home video | Repair Only | VHS Home Video | Film: Instant Photo |
+| Cyberpunk street | Keep the Mood | Hexagon Night Bokeh | Mood: Cyberpunk Neon |
+| Toy town from above | Standard | Miniature World | Mood: Anime Vivid |
+| Old photo brought back | Old Photo Scan | Vintage Lens | B&W: Sepia |
+| Light in the nave | Keep the Mood | Cathedral Light | Film: Tungsten Amber |
+| Christmas lights | Keep the Mood | Star Filter Night | Auteur: Happy Together |
+| Garden storybook portrait | Gentle | Swirly Vintage Portrait | Auteur: Pastel Symmetry |
+| Nature up close | Standard | Macro Close-up | Natural: HDR Detail |
+| Digital breakdown | Repair Only | Glitch Art | Splash: Neon Blue |
+
+### Partners for every camera
+
+Every Optical Realism preset with the Digital Mastering looks that suit it
+(the first one is the closest match) and the correction to run first. Every
+Digital Mastering preset appears at least once.
+
+| Optical Realism | Digital Mastering | Auto Color Corrector |
+|---|---|---|
+| Subtle Real Camera | Natural: Clean Polish · Natural: Crisp Clear · Film: Travel Ektar · Cinema: Day for Night | Natural |
+| Portrait 85mm f/1.8 | Portrait: Studio Skin · Portrait: Golden Skin · Film: Portra Golden · Splash: Subject in Colour | Natural |
+| Portrait f/1.2 Dreamy | Portrait: Soft Glamour · Mood: Lavender Dusk · Auteur: Pastel Symmetry · Film: Portra Golden | Gentle |
+| Street 35mm f/5.6 | Natural: Vivid Pop · Film: Kodachrome · Auteur: Matte Street · Film: Cool Slide Stock · Splash: Golden Yellow · Splash: Red Accent | Standard |
+| Macro Close-up | Natural: HDR Detail · Film: Emerald · Film: Velvia · Natural: Vivid Pop | Standard |
+| Vintage Lens | Film: Faded Vintage · Film: Instant Photo · B&W: Sepia · Auteur: Hong Kong 90s | Gentle |
+| Film Camera 35mm | Film: Portra Golden · Film: Olive Signature · Film: Kodachrome · Film: Travel Ektar · Auteur: Mood for Love | Natural |
+| Heavy Film Grain | B&W: Classic Silver · B&W: Hard Noir · Film: Bleach Bypass · Auteur: Nordic Noir | Standard |
+| Pro-Mist Cinema | Cinema: Teal & Orange · Auteur: Mood for Love · Auteur: 2046 · Auteur: Golden Anamorphic | Keep the Mood |
+| Anamorphic Flare | Cinema: Blockbuster · Cinema: Desert Heat · Auteur: Golden Anamorphic · Cinema: Teal & Orange | Standard |
+| Night City Glow | Auteur: Chungking Neon · Mood: Cyberpunk Neon · Film: Red Neon Night · Auteur: Saigon Rain | Keep the Mood |
+| Landscape Aerial Haze | Film: Velvia · Mood: Golden Hour · Mood: Autumn Warmth · B&W: Infrared · Cinema: Day for Night | Standard |
+| Foggy Morning | Natural: Soft Matte · Mood: Blue Hour · Auteur: Nordic Noir · Mood: Arctic Cold | Keep the Mood |
+| Backlit Rim Light | Mood: Golden Hour · Portrait: Golden Skin · Auteur: Golden Anamorphic · Mood: Lavender Dusk | Keep the Mood |
+| Dusty Night Film | Cinema: Dusty Night · Cinema: Neo-Noir Blue · Cinema: Moody Dark · Auteur: Fallen Angels | Keep the Mood |
+| Digital Flash | Mood: Flash Snapshot · Film: Cross Process · Natural: Vivid Pop | Natural |
+| Anamorphic Night | Cinema: Neo-Noir Blue · Auteur: Saigon Rain · Cinema: Digital Green · Auteur: 2046 | Keep the Mood |
+| Star Filter Night | Auteur: Happy Together · Mood: Blue Hour · Film: Tungsten Amber | Keep the Mood |
+| Cathedral Light | Film: Tungsten Amber · Cinema: Moody Dark · Auteur: Sickly Thriller · B&W: Classic Silver | Keep the Mood |
+| Miniature World | Mood: Anime Vivid · Natural: Vivid Pop · Auteur: Pastel Symmetry · Film: Kodachrome | Standard |
+| Swirly Vintage Portrait | Auteur: Pastel Symmetry · Film: Emerald · Film: Olive Signature · Mood: Autumn Warmth | Gentle |
+| Soap Bubble Bokeh | Film: Velvia · Mood: Golden Hour · Portrait: Soft Glamour | Gentle |
+| VHS Home Video | Film: Instant Photo · Film: Faded Vintage · Auteur: Hong Kong 90s | Repair Only |
+| CRT Screen | Cinema: Digital Green · Mood: Cyberpunk Neon · B&W: Hard Noir | Repair Only |
+| Hexagon Night Bokeh | Mood: Cyberpunk Neon · Auteur: Happy Together · Film: Red Neon Night · Auteur: Chungking Neon | Keep the Mood |
+| Glitch Art | Splash: Neon Blue · Mood: Cyberpunk Neon · Cinema: Digital Green | Repair Only |
+| Retro Glass | Portrait: Editorial Crisp · Film: Portra Golden · Auteur: Matte Street · Film: Faded Vintage | Natural |
+| Retro Glass Deep | Film: Portra Golden · Auteur: Mood for Love · Film: Emerald · Portrait: Golden Skin | Natural |
+
+Keep the Mood is the right correction for any picture whose colour or
+darkness is the point (night, neon, candle light, fog); Repair Only for
+looks that deliberately degrade the picture; Old Photo Scan for real scans.
 
 ## Lens character, filters and retro video
 
